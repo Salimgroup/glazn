@@ -35,15 +35,15 @@ export function useUserSpending() {
 
     const fetchSpending = async () => {
       const { data, error } = await supabase
-        .from('user_spending')
+        .from('user_spending' as any)
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user spending:', error);
-      } else {
-        setSpending(data);
+      } else if (data) {
+        setSpending(data as unknown as UserSpending);
       }
       setLoading(false);
     };
@@ -77,14 +77,19 @@ export function useUserSpending() {
   const addSpending = async (amount: number) => {
     if (!user) return;
 
-    const { error } = await supabase.rpc('add_user_spending', {
-      p_user_id: user.id,
-      p_amount: amount,
-    });
+    try {
+      const { error } = await (supabase as any).rpc('add_user_spending', {
+        p_user_id: user.id,
+        p_amount: amount,
+      });
 
-    if (error) {
-      console.error('Error adding spending:', error);
-      throw error;
+      if (error) {
+        console.error('Error adding spending:', error);
+        throw error;
+      }
+    } catch (err) {
+      console.error('Error calling add_user_spending:', err);
+      throw err;
     }
   };
 
