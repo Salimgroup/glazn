@@ -102,7 +102,11 @@ export default function Auth() {
               New to Glazn? Learn How It Works →
             </button>
             <p className="text-sm text-muted-foreground">
-              By signing in, you agree to our Terms of Service and{' '}
+              By signing in, you agree to our{' '}
+              <Link to="/terms-of-service" className="text-neon-cyan hover:text-neon-yellow transition-colors underline">
+                Terms of Service
+              </Link>
+              {' '}and{' '}
               <Link to="/privacy-policy" className="text-neon-cyan hover:text-neon-yellow transition-colors underline">
                 Privacy Policy
               </Link>
