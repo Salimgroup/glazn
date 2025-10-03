@@ -13,6 +13,7 @@ interface ContributeToBountyModalProps {
   requestId: string;
   requestTitle: string;
   currentBounty: number;
+  minimumContribution?: number;
 }
 
 export function ContributeToBountyModal({
@@ -21,6 +22,7 @@ export function ContributeToBountyModal({
   requestId,
   requestTitle,
   currentBounty,
+  minimumContribution = 0,
 }: ContributeToBountyModalProps) {
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
@@ -34,6 +36,15 @@ export function ContributeToBountyModal({
       toast({
         title: 'Invalid amount',
         description: 'Please enter a valid contribution amount',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (minimumContribution > 0 && contributionAmount < minimumContribution) {
+      toast({
+        title: 'Amount too low',
+        description: `Minimum contribution is $${minimumContribution}`,
         variant: 'destructive',
       });
       return;
@@ -93,6 +104,14 @@ export function ContributeToBountyModal({
             <p className="text-2xl font-bold text-neon-yellow">
               ${currentBounty.toLocaleString()}
             </p>
+            {minimumContribution > 0 && (
+              <div className="mt-3 pt-3 border-t border-neon-purple/30">
+                <p className="text-xs text-muted-foreground mb-1">Minimum Contribution Required</p>
+                <p className="text-lg font-bold text-neon-cyan">
+                  ${minimumContribution.toLocaleString()}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -103,11 +122,11 @@ export function ContributeToBountyModal({
               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="number"
-                min="1"
+                min={minimumContribution || 1}
                 step="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter amount"
+                placeholder={minimumContribution > 0 ? `Min: $${minimumContribution}` : "Enter amount"}
                 className="pl-10 bg-background/50 border-neon-cyan/30 focus:border-neon-cyan"
               />
             </div>

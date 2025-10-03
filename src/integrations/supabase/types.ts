@@ -64,6 +64,7 @@ export type Database = {
           deadline: string
           description: string
           id: string
+          minimum_contribution: number | null
           status: string | null
           title: string
           updated_at: string | null
@@ -77,6 +78,7 @@ export type Database = {
           deadline: string
           description: string
           id?: string
+          minimum_contribution?: number | null
           status?: string | null
           title: string
           updated_at?: string | null
@@ -90,6 +92,7 @@ export type Database = {
           deadline?: string
           description?: string
           id?: string
+          minimum_contribution?: number | null
           status?: string | null
           title?: string
           updated_at?: string | null

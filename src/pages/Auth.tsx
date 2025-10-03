@@ -94,9 +94,17 @@ export default function Auth() {
           </Button>
 
           {/* Footer */}
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            By signing in, you agree to our Terms of Service and Privacy Policy
-          </p>
+          <div className="text-center mt-6 space-y-3">
+            <button
+              onClick={() => navigate('/how-to')}
+              className="text-neon-cyan hover:text-neon-yellow transition-colors font-medium text-sm"
+            >
+              New to Glazn? Learn How It Works →
+            </button>
+            <p className="text-sm text-muted-foreground">
+              By signing in, you agree to our Terms of Service and Privacy Policy
+            </p>
+          </div>
         </div>
 
         {/* AI Feature Highlight */}

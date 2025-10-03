@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy, Link as LinkIcon, FileCheck, DollarSign, Plus } from 'lucide-react';
+import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy, Link as LinkIcon, FileCheck, DollarSign, Plus, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -136,7 +136,7 @@ export default function Glazn() {
   const [showExternalSubmission, setShowExternalSubmission] = useState<{ id: number; title: string } | null>(null);
   const [showSubmissionsManagement, setShowSubmissionsManagement] = useState<{ id: number; title: string } | null>(null);
   const [shareableBounty, setShareableBounty] = useState<{ id: number; title: string } | null>(null);
-  const [contributeToBounty, setContributeToBounty] = useState<{ id: number; title: string; bounty: number } | null>(null);
+  const [contributeToBounty, setContributeToBounty] = useState<{ id: number; title: string; bounty: number; minimumContribution?: number } | null>(null);
   const [manageContributions, setManageContributions] = useState<{ id: number; title: string } | null>(null);
 
   const [newPortfolioItem, setNewPortfolioItem] = useState({
@@ -153,7 +153,8 @@ export default function Glazn() {
     bounty: '',
     category: 'Photography',
     deadline: '3',
-    allowContributions: true
+    allowContributions: true,
+    minimumContribution: '0'
   });
 
   const categories = ['All', 'Photography', 'Video', 'Digital Art', 'Graphic Design', '3D Rendering', 'Animation', 'Writing', 'Music'];
@@ -286,7 +287,7 @@ export default function Glazn() {
       };
       setRequests([request, ...requests]);
       setShowCreateModal(false);
-      setNewRequest({ title: '', description: '', bounty: '', category: 'Photography', deadline: '3', allowContributions: true });
+      setNewRequest({ title: '', description: '', bounty: '', category: 'Photography', deadline: '3', allowContributions: true, minimumContribution: '0' });
       
       // Add spending and update points
       try {
@@ -332,7 +333,8 @@ export default function Glazn() {
       bounty: influencer.suggestedBounty.toString(),
       category: influencer.category.split(' ')[0],
       deadline: '7',
-      allowContributions: true
+      allowContributions: true,
+      minimumContribution: '0'
     });
     setActiveTab('browse');
     setShowCreateModal(true);
@@ -391,6 +393,13 @@ export default function Glazn() {
             </div>
             
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate('/how-to')}
+                className="bg-card/60 hover:bg-card/80 text-foreground px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 border-2 border-neon-cyan/40"
+              >
+                <HelpCircle className="w-4 h-4" />
+                HOW TO
+              </button>
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="bg-gradient-neon text-white px-6 py-2 rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-2"
@@ -667,7 +676,12 @@ export default function Glazn() {
                               SUBMIT
                             </button>
                             <button
-                              onClick={() => setContributeToBounty({ id: request.id, title: request.title, bounty: request.bounty })}
+                              onClick={() => setContributeToBounty({ 
+                                id: request.id, 
+                                title: request.title, 
+                                bounty: request.bounty,
+                                minimumContribution: 0
+                              })}
                               className="bg-gradient-to-r from-neon-yellow to-neon-pink hover:shadow-glow text-white px-4 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 shadow-neon"
                             >
                               <Plus className="w-4 h-4" />
@@ -995,6 +1009,29 @@ export default function Glazn() {
                   <p className="text-xs text-white/70 mt-1">Contributors can add funds but you maintain full control over accepting submissions</p>
                 </label>
               </div>
+
+              {newRequest.allowContributions && (
+                <div>
+                  <label className="block text-sm font-bold text-white mb-2">
+                    Minimum Contribution (Optional)
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-white">$</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={newRequest.minimumContribution}
+                      onChange={(e) => setNewRequest({ ...newRequest, minimumContribution: e.target.value })}
+                      placeholder="0"
+                      className="w-full pl-10 pr-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-neon-yellow focus:border-neon-yellow"
+                    />
+                  </div>
+                  <p className="text-xs text-white/50 mt-1">
+                    Set a minimum amount contributors must pledge to access submissions (leave 0 for no minimum)
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="p-6 border-t border-yellow-400/30 flex gap-3 bg-black/30">
@@ -1142,6 +1179,7 @@ export default function Glazn() {
           requestId={contributeToBounty.id.toString()}
           requestTitle={contributeToBounty.title}
           currentBounty={contributeToBounty.bounty}
+          minimumContribution={contributeToBounty.minimumContribution}
         />
       )}
 
