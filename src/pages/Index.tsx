@@ -1,12 +1,22 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut } from 'lucide-react';
+import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { StatusBadge, StatusProgress } from '@/components/StatusBadge';
+import { useUserSpending } from '@/hooks/useUserSpending';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function GlassSlipper() {
   const { user, signOut, loading } = useAuth();
+  const { spending, addSpending } = useUserSpending();
   const navigate = useNavigate();
   const COMMISSION_RATE = 0.20;
 
@@ -16,6 +26,8 @@ export default function GlassSlipper() {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
+
+  const [showStatusModal, setShowStatusModal] = useState(false);
 
   const calculateCreatorPayout = (bounty: number) => {
     return (bounty * (1 - COMMISSION_RATE)).toFixed(2);
@@ -242,13 +254,14 @@ export default function GlassSlipper() {
     return filtered;
   }, [requests, searchQuery, selectedCategory, bountyRange, sortBy]);
 
-  const handleCreateRequest = () => {
+  const handleCreateRequest = async () => {
     if (newRequest.title && newRequest.description && newRequest.bounty) {
+      const bountyAmount = parseInt(newRequest.bounty);
       const request = {
         id: requests.length + 1,
         title: newRequest.title,
         description: newRequest.description,
-        bounty: parseInt(newRequest.bounty),
+        bounty: bountyAmount,
         requester: 'You',
         category: newRequest.category,
         deadline: `${newRequest.deadline} days`,
@@ -261,7 +274,14 @@ export default function GlassSlipper() {
       setShowCreateModal(false);
       setNewRequest({ title: '', description: '', bounty: '', category: 'Photography', deadline: '3' });
       
-      toast.success('✨ Request posted! AI is now scanning for matches...', { duration: 3000 });
+      // Add spending and update points
+      try {
+        await addSpending(bountyAmount);
+        toast.success(`✨ Request posted! +${bountyAmount} points earned!`, { duration: 3000 });
+      } catch (error) {
+        console.error('Error adding spending:', error);
+        toast.success('✨ Request posted! AI is now scanning for matches...', { duration: 3000 });
+      }
     }
   };
 
@@ -312,8 +332,11 @@ export default function GlassSlipper() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {user && (
-                <div className="flex items-center gap-3 px-3 py-2 bg-muted rounded-lg">
+              {user && spending && (
+                <button
+                  onClick={() => setShowStatusModal(true)}
+                  className="flex items-center gap-3 px-3 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors cursor-pointer"
+                >
                   {user.user_metadata?.avatar_url && (
                     <img 
                       src={user.user_metadata.avatar_url} 
@@ -321,10 +344,20 @@ export default function GlassSlipper() {
                       className="w-8 h-8 rounded-full"
                     />
                   )}
-                  <span className="text-sm font-medium text-foreground">
-                    {user.user_metadata?.full_name || user.email}
-                  </span>
-                </div>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium text-foreground">
+                      {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {spending.points} points
+                    </span>
+                  </div>
+                  <StatusBadge 
+                    tier={spending.current_tier} 
+                    title={spending.title}
+                    showTitle={false}
+                  />
+                </button>
               )}
               <button
                 onClick={() => setShowAISettings(true)}
@@ -981,6 +1014,93 @@ export default function GlassSlipper() {
           </div>
         </div>
       )}
+
+      {/* Status Modal */}
+      <Dialog open={showStatusModal} onOpenChange={setShowStatusModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <Trophy className="w-6 h-6 text-primary" />
+              Your Status & Rewards
+            </DialogTitle>
+            <DialogDescription>
+              Track your spending and unlock exclusive titles
+            </DialogDescription>
+          </DialogHeader>
+
+          {spending && (
+            <div className="space-y-6 pt-4">
+              {/* Current Status */}
+              <div className="flex flex-col items-center gap-4 p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+                <StatusBadge 
+                  tier={spending.current_tier} 
+                  title={spending.title}
+                  className="scale-125"
+                />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-foreground">
+                    {spending.points} Points
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    ${spending.total_spent.toFixed(2)} total spent
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-foreground">Level Progress</h3>
+                <StatusProgress 
+                  currentSpending={spending.total_spent}
+                  currentTier={spending.current_tier}
+                />
+              </div>
+
+              {/* All Tiers */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-foreground">All Status Tiers</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <StatusBadge tier="glass_beginner" title="👟 Glass Beginner" />
+                    <span className="text-muted-foreground">$0+</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <StatusBadge tier="glass_collector" title="🎯 Glass Collector" />
+                    <span className="text-muted-foreground">$100+</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <StatusBadge tier="glass_enthusiast" title="✨ Glass Enthusiast" />
+                    <span className="text-muted-foreground">$500+</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <StatusBadge tier="glass_connoisseur" title="🌟 Glass Connoisseur" />
+                    <span className="text-muted-foreground">$2,000+</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <StatusBadge tier="glass_royalty" title="💎 Glass Royalty" />
+                    <span className="text-muted-foreground">$5,000+</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <StatusBadge tier="glass_legend" title="👑 Glass Legend" />
+                    <span className="text-muted-foreground">$10,000+</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Benefits */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-foreground">Status Benefits</h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Exclusive badges and titles</li>
+                  <li>• Priority in creator matching</li>
+                  <li>• Recognition in the community</li>
+                  <li>• Special perks for top tiers</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
