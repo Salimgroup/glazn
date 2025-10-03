@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Trophy, Crown, Star, Medal, TrendingUp } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface Profile {
+interface PublicProfile {
   id: string;
   username: string;
   display_name: string;
@@ -11,33 +11,33 @@ interface Profile {
   reputation_score: number;
   bounties_completed: number;
   bounties_posted: number;
-  success_rate: number;
 }
 
 export function LeaderboardPanel() {
-  const [topCreators, setTopCreators] = useState<Profile[]>([]);
-  const [topRequesters, setTopRequesters] = useState<Profile[]>([]);
+  const [topCreators, setTopCreators] = useState<PublicProfile[]>([]);
+  const [topRequesters, setTopRequesters] = useState<PublicProfile[]>([]);
 
   useEffect(() => {
     loadLeaderboards();
   }, []);
 
   const loadLeaderboards = async () => {
-    // Use public_profiles view to avoid exposing financial data
+    // Use public_profiles view that excludes sensitive financial data
+    // Sort by reputation score instead of financial data for privacy
     const { data: creators } = await supabase
       .from('public_profiles')
       .select('*')
-      .order('bounties_completed', { ascending: false })
+      .order('reputation_score', { ascending: false })
       .limit(10);
 
     const { data: requesters } = await supabase
       .from('public_profiles')
       .select('*')
-      .order('bounties_posted', { ascending: false })
+      .order('reputation_score', { ascending: false })
       .limit(10);
 
-    if (creators) setTopCreators(creators as any);
-    if (requesters) setTopRequesters(requesters as any);
+    if (creators) setTopCreators(creators as PublicProfile[]);
+    if (requesters) setTopRequesters(requesters as PublicProfile[]);
   };
 
   const getRankIcon = (index: number) => {
@@ -47,7 +47,7 @@ export function LeaderboardPanel() {
     return <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>;
   };
 
-  const LeaderList = ({ profiles, type }: { profiles: Profile[]; type: 'creator' | 'requester' }) => (
+  const LeaderList = ({ profiles, type }: { profiles: PublicProfile[]; type: 'creator' | 'requester' }) => (
     <div className="space-y-2">
       {profiles.map((profile, index) => (
         <div
@@ -69,7 +69,7 @@ export function LeaderboardPanel() {
             <p className="text-xs text-muted-foreground">
               {type === 'creator'
                 ? `${profile.bounties_completed} completed`
-                : `${profile.bounties_posted} posted`}
+                : `${profile.bounties_posted} bounties posted`}
             </p>
           </div>
           <div className="text-right">

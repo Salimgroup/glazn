@@ -40,7 +40,7 @@ export function ContributeToBountyModal({
     });
 
     if (!validation.success) {
-      const firstError = validation.error.errors[0];
+      const firstError = validation.error.issues[0];
       toast({
         title: 'Validation Error',
         description: firstError.message,
@@ -136,6 +136,7 @@ export function ContributeToBountyModal({
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder={minimumContribution > 0 ? `Min: $${minimumContribution}` : "Enter amount"}
                 className="pl-10 bg-background/50 border-neon-cyan/30 focus:border-neon-cyan"
+                maxLength={10}
               />
             </div>
           </div>
@@ -150,7 +151,9 @@ export function ContributeToBountyModal({
               placeholder="Add a message to the bounty owner..."
               className="bg-background/50 border-neon-cyan/30 focus:border-neon-cyan resize-none"
               rows={3}
+              maxLength={1000}
             />
+            <p className="text-xs text-muted-foreground">{message.length}/1000 characters</p>
           </div>
 
           <div className="flex gap-3 pt-4">

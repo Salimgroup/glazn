@@ -35,7 +35,7 @@ export function ExternalSubmissionModal({
     const validation = externalSubmissionSchema.safeParse(formData);
 
     if (!validation.success) {
-      const firstError = validation.error.errors[0];
+      const firstError = validation.error.issues[0];
       toast.error(firstError.message);
       return;
     }
@@ -115,6 +115,7 @@ export function ExternalSubmissionModal({
                 placeholder="https://onlyfans.com/your-content-link"
                 className="pl-10"
                 required
+                maxLength={500}
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -131,6 +132,7 @@ export function ExternalSubmissionModal({
               value={formData.platformName}
               onChange={(e) => setFormData({ ...formData, platformName: e.target.value })}
               placeholder="e.g., OnlyFans, Instagram, TikTok"
+              maxLength={100}
             />
           </div>
 
@@ -144,7 +146,9 @@ export function ExternalSubmissionModal({
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Brief title for this submission"
               required
+              maxLength={200}
             />
+            <p className="text-xs text-gray-500 mt-1">{formData.title.length}/200 characters</p>
           </div>
 
           <div>
@@ -157,7 +161,9 @@ export function ExternalSubmissionModal({
               placeholder="Describe what's in this content..."
               rows={3}
               className="w-full px-4 py-2.5 border border-input rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              maxLength={2000}
             />
+            <p className="text-xs text-gray-500 mt-1">{formData.description.length}/2000 characters</p>
           </div>
 
           <div>
@@ -170,7 +176,9 @@ export function ExternalSubmissionModal({
               placeholder="Add any notes about why this content matches their request..."
               rows={3}
               className="w-full px-4 py-2.5 border border-input rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              maxLength={1000}
             />
+            <p className="text-xs text-gray-500 mt-1">{formData.previewNotes.length}/1000 characters</p>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

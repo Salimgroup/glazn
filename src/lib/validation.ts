@@ -4,55 +4,27 @@ import { z } from 'zod';
 export const contributionSchema = z.object({
   amount: z.number()
     .positive('Amount must be positive')
-    .max(1000000, 'Amount cannot exceed $1,000,000'),
+    .max(1000000, 'Amount too large'),
   message: z.string()
-    .max(1000, 'Message cannot exceed 1000 characters')
+    .max(1000, 'Message must be less than 1000 characters')
     .optional()
-    .transform(val => val?.trim() || undefined),
 });
 
-// External submission validation schema
+// External submission validation schema  
 export const externalSubmissionSchema = z.object({
   externalUrl: z.string()
     .url('Please enter a valid URL')
-    .max(500, 'URL cannot exceed 500 characters')
-    .trim(),
+    .max(500, 'URL too long'),
   platformName: z.string()
-    .max(100, 'Platform name cannot exceed 100 characters')
-    .trim()
+    .max(100, 'Platform name too long')
     .optional(),
   title: z.string()
     .min(1, 'Title is required')
-    .max(200, 'Title cannot exceed 200 characters')
-    .trim(),
+    .max(200, 'Title must be less than 200 characters'),
   description: z.string()
-    .max(2000, 'Description cannot exceed 2000 characters')
-    .trim()
+    .max(2000, 'Description must be less than 2000 characters')
     .optional(),
   previewNotes: z.string()
-    .max(1000, 'Preview notes cannot exceed 1000 characters')
-    .trim()
-    .optional(),
+    .max(1000, 'Preview notes must be less than 1000 characters')
+    .optional()
 });
-
-// Bounty request validation schema
-export const bountyRequestSchema = z.object({
-  title: z.string()
-    .min(1, 'Title is required')
-    .max(200, 'Title cannot exceed 200 characters')
-    .trim(),
-  description: z.string()
-    .min(1, 'Description is required')
-    .max(5000, 'Description cannot exceed 5000 characters')
-    .trim(),
-  bounty: z.number()
-    .nonnegative('Bounty must be positive')
-    .max(1000000, 'Bounty cannot exceed $1,000,000'),
-  minimumContribution: z.number()
-    .nonnegative('Minimum contribution must be non-negative')
-    .optional(),
-});
-
-export type ContributionInput = z.infer<typeof contributionSchema>;
-export type ExternalSubmissionInput = z.infer<typeof externalSubmissionSchema>;
-export type BountyRequestInput = z.infer<typeof bountyRequestSchema>;
