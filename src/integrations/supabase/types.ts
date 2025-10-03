@@ -14,7 +14,107 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      requests: {
+        Row: {
+          bounty: number
+          category: string
+          created_at: string | null
+          deadline: string
+          description: string
+          id: string
+          status: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          bounty: number
+          category: string
+          created_at?: string | null
+          deadline: string
+          description: string
+          id?: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          bounty?: number
+          category?: string
+          created_at?: string | null
+          deadline?: string
+          description?: string
+          id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          external_url: string | null
+          id: string
+          platform_name: string | null
+          preview_notes: string | null
+          rejection_reason: string | null
+          request_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["submission_status"]
+          submission_type: Database["public"]["Enums"]["submission_type"]
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          external_url?: string | null
+          id?: string
+          platform_name?: string | null
+          preview_notes?: string | null
+          rejection_reason?: string | null
+          request_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          submission_type?: Database["public"]["Enums"]["submission_type"]
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          external_url?: string | null
+          id?: string
+          platform_name?: string | null
+          preview_notes?: string | null
+          rejection_reason?: string | null
+          request_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          submission_type?: Database["public"]["Enums"]["submission_type"]
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +123,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      submission_status: "pending" | "approved" | "rejected"
+      submission_type: "upload" | "external_url"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +251,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      submission_status: ["pending", "approved", "rejected"],
+      submission_type: ["upload", "external_url"],
+    },
   },
 } as const
