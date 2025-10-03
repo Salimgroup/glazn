@@ -244,6 +244,54 @@ export type Database = {
           },
         ]
       }
+      payout_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          crypto_wallet_address: string | null
+          fee_amount: number
+          id: string
+          net_amount: number
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          processed_at: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["transaction_status"]
+          stripe_account_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          crypto_wallet_address?: string | null
+          fee_amount: number
+          id?: string
+          net_amount: number
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          processed_at?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          stripe_account_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          crypto_wallet_address?: string | null
+          fee_amount?: number
+          id?: string
+          net_amount?: number
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          processed_at?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          stripe_account_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -391,6 +439,42 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_connected_accounts: {
+        Row: {
+          account_status: string
+          charges_enabled: boolean
+          created_at: string
+          details_submitted: boolean
+          id: string
+          payouts_enabled: boolean
+          stripe_account_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_status?: string
+          charges_enabled?: boolean
+          created_at?: string
+          details_submitted?: boolean
+          id?: string
+          payouts_enabled?: boolean
+          stripe_account_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_status?: string
+          charges_enabled?: boolean
+          created_at?: string
+          details_submitted?: boolean
+          id?: string
+          payouts_enabled?: boolean
+          stripe_account_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       submissions: {
         Row: {
           created_at: string | null
@@ -453,6 +537,66 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          crypto_tx_hash: string | null
+          crypto_wallet_address: string | null
+          currency: string
+          description: string | null
+          fee_amount: number
+          id: string
+          metadata: Json | null
+          net_amount: number
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          status: Database["public"]["Enums"]["transaction_status"]
+          stripe_payment_id: string | null
+          stripe_payout_id: string | null
+          type: Database["public"]["Enums"]["transaction_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          crypto_tx_hash?: string | null
+          crypto_wallet_address?: string | null
+          currency?: string
+          description?: string | null
+          fee_amount?: number
+          id?: string
+          metadata?: Json | null
+          net_amount: number
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          status?: Database["public"]["Enums"]["transaction_status"]
+          stripe_payment_id?: string | null
+          stripe_payout_id?: string | null
+          type: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          crypto_tx_hash?: string | null
+          crypto_wallet_address?: string | null
+          currency?: string
+          description?: string | null
+          fee_amount?: number
+          id?: string
+          metadata?: Json | null
+          net_amount?: number
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          status?: Database["public"]["Enums"]["transaction_status"]
+          stripe_payment_id?: string | null
+          stripe_payout_id?: string | null
+          type?: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -473,6 +617,42 @@ export type Database = {
           assigned_by?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_balances: {
+        Row: {
+          available_balance: number
+          created_at: string
+          currency: string
+          id: string
+          pending_balance: number
+          total_deposited: number
+          total_withdrawn: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          pending_balance?: number
+          total_deposited?: number
+          total_withdrawn?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          pending_balance?: number
+          total_deposited?: number
+          total_withdrawn?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -543,8 +723,24 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      payment_method: "stripe" | "xrp" | "solana"
       submission_status: "pending" | "approved" | "rejected"
       submission_type: "upload" | "external_url"
+      transaction_status:
+        | "pending"
+        | "completed"
+        | "failed"
+        | "cancelled"
+        | "processing"
+      transaction_type:
+        | "deposit"
+        | "withdrawal"
+        | "bounty_payment"
+        | "bounty_refund"
+        | "bounty_earnings"
+        | "service_fee"
+        | "crypto_deposit"
+        | "crypto_withdrawal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -673,8 +869,26 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      payment_method: ["stripe", "xrp", "solana"],
       submission_status: ["pending", "approved", "rejected"],
       submission_type: ["upload", "external_url"],
+      transaction_status: [
+        "pending",
+        "completed",
+        "failed",
+        "cancelled",
+        "processing",
+      ],
+      transaction_type: [
+        "deposit",
+        "withdrawal",
+        "bounty_payment",
+        "bounty_refund",
+        "bounty_earnings",
+        "service_fee",
+        "crypto_deposit",
+        "crypto_withdrawal",
+      ],
     },
   },
 } as const
