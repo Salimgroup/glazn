@@ -1,9 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
 
 export default function GlassSlipper() {
+  const { user, signOut, loading } = useAuth();
+  const navigate = useNavigate();
   const COMMISSION_RATE = 0.20;
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
 
   const calculateCreatorPayout = (bounty: number) => {
     return (bounty * (1 - COMMISSION_RATE)).toFixed(2);
@@ -300,6 +312,20 @@ export default function GlassSlipper() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {user && (
+                <div className="flex items-center gap-3 px-3 py-2 bg-muted rounded-lg">
+                  {user.user_metadata?.avatar_url && (
+                    <img 
+                      src={user.user_metadata.avatar_url} 
+                      alt={user.user_metadata?.full_name || 'User'} 
+                      className="w-8 h-8 rounded-full"
+                    />
+                  )}
+                  <span className="text-sm font-medium text-foreground">
+                    {user.user_metadata?.full_name || user.email}
+                  </span>
+                </div>
+              )}
               <button
                 onClick={() => setShowAISettings(true)}
                 className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
@@ -318,6 +344,17 @@ export default function GlassSlipper() {
                 <Crown className="w-4 h-4" />
                 Post Request
               </button>
+              <Button
+                onClick={async () => {
+                  await signOut();
+                  toast.success('Signed out successfully');
+                  navigate('/auth');
+                }}
+                variant="outline"
+                size="icon"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </div>
