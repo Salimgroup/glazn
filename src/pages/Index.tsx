@@ -316,70 +316,60 @@ export default function GlassSlipper() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-purple-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 p-2.5 rounded-xl">
-                  <Crown className="w-7 h-7 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-800">
+      {/* Floating Rank Badge */}
+      {user && spending && (
+        <button
+          onClick={() => setShowStatusModal(true)}
+          className="fixed top-4 right-4 z-50 group animate-fade-in"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
+            <div className="relative bg-gradient-to-br from-purple-600 to-pink-600 px-6 py-3 rounded-2xl border-2 border-yellow-400 shadow-2xl hover:scale-105 transition-transform">
+              <div className="flex items-center gap-3">
+                <Trophy className="w-6 h-6 text-yellow-400" />
+                <div className="text-left">
+                  <div className="text-xs text-yellow-400 font-bold uppercase tracking-wider">
+                    {spending.current_tier}
+                  </div>
+                  <div className="text-2xl font-black text-white">
+                    ${spending.points}
+                  </div>
                 </div>
-                <Sparkles className="w-4 h-4 text-yellow-400 absolute -top-1 -right-1 animate-pulse" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-clip-text text-transparent">
-                  GlassSlipper
-                </h1>
-                <p className="text-xs text-purple-600 italic">AI-Powered Perfect Fits</p>
+                <StatusBadge 
+                  tier={spending.current_tier} 
+                  title={spending.title}
+                  showTitle={false}
+                />
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              {user && spending && (
-                <button
-                  onClick={() => setShowStatusModal(true)}
-                  className="flex items-center gap-3 px-3 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors cursor-pointer"
-                >
-                  {user.user_metadata?.avatar_url && (
-                    <img 
-                      src={user.user_metadata.avatar_url} 
-                      alt={user.user_metadata?.full_name || 'User'} 
-                      className="w-8 h-8 rounded-full"
-                    />
-                  )}
-                  <div className="flex flex-col items-start">
-                    <span className="text-sm font-medium text-foreground">
-                      {user.user_metadata?.full_name || user.email?.split('@')[0]}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {spending.points} points
-                    </span>
-                  </div>
-                  <StatusBadge 
-                    tier={spending.current_tier} 
-                    title={spending.title}
-                    showTitle={false}
-                  />
-                </button>
-              )}
-              <button
-                onClick={() => setShowAISettings(true)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                  aiEnabled 
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md hover:shadow-lg' 
-                    : 'bg-gray-100 text-gray-600 border border-gray-300'
-                }`}
-              >
-                <Sparkles className="w-4 h-4" />
-                AI {aiEnabled ? 'Active' : 'Off'}
-              </button>
+          </div>
+        </button>
+      )}
+
+      {/* Compact Header */}
+      <header className="bg-black/30 backdrop-blur-xl border-b border-white/10 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 rounded-xl">
+                  <Crown className="w-6 h-6 text-white" />
+                </div>
+                <Sparkles className="w-3 h-3 text-yellow-300 absolute -top-1 -right-1 animate-pulse" />
+              </div>
+              <h1 className="text-xl font-black bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">
+                GlassSlipper
+              </h1>
+            </div>
+            
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white px-6 py-2.5 rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2"
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-bold hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all flex items-center gap-2 animate-pulse"
               >
                 <Crown className="w-4 h-4" />
-                Post Request
+                POST BOUNTY
               </button>
               <Button
                 onClick={async () => {
@@ -389,245 +379,148 @@ export default function GlassSlipper() {
                 }}
                 variant="outline"
                 size="icon"
+                className="border-white/20 hover:bg-white/10"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-4 h-4 text-white" />
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 text-white py-12 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <Sparkles className="absolute top-10 left-10 w-6 h-6 animate-pulse" />
-          <Sparkles className="absolute top-20 right-20 w-8 h-8 animate-pulse" style={{ animationDelay: '0.5s' }} />
-          <Sparkles className="absolute bottom-10 left-1/4 w-5 h-5 animate-pulse" style={{ animationDelay: '1s' }} />
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 relative">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
-              <Zap className="w-4 h-4 text-yellow-300" />
-              <span className="text-sm font-medium">AI-Powered Matching • Auto-Submit • Earn Passively</span>
+      {/* Hero Stats Bar */}
+      <div className="bg-gradient-to-r from-yellow-500 via-orange-500 to-pink-500 py-4 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="bg-black/20 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+              <div className="text-3xl font-black text-white mb-1">${requests.reduce((sum, r) => sum + r.bounty, 0).toLocaleString()}</div>
+              <div className="text-xs font-bold text-white/90 uppercase tracking-wider">Total Bounties</div>
             </div>
-            <h2 className="text-4xl font-bold mb-3">Every Request Finds Its Perfect Match</h2>
-            <p className="text-xl text-white/90 italic">Upload once. Earn forever. AI does the work.</p>
+            <div className="bg-black/20 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+              <div className="text-3xl font-black text-white mb-1">{filteredRequests.length}</div>
+              <div className="text-xs font-bold text-white/90 uppercase tracking-wider">Active Requests</div>
+            </div>
+            <div className="bg-black/20 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+              <div className="text-3xl font-black text-white mb-1">{portfolio.reduce((sum, p) => sum + p.timesUsed, 0)}</div>
+              <div className="text-xs font-bold text-white/90 uppercase tracking-wider">AI Matches</div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-purple-200">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Simplified Tabs */}
+        <div className="flex gap-3 mb-6">
           <button
             onClick={() => setActiveTab('browse')}
-            className={`pb-3 px-4 font-medium transition-colors flex items-center gap-2 ${
+            className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
               activeTab === 'browse'
-                ? 'border-b-2 border-purple-500 text-purple-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-[0_0_20px_rgba(251,191,36,0.5)]'
+                : 'bg-white/10 text-white/60 hover:bg-white/20'
             }`}
           >
-            <Search className="w-4 h-4" />
-            Browse Requests
-            <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">
-              {filteredRequests.length}
-            </span>
+            <div className="flex items-center justify-center gap-2">
+              <Target className="w-5 h-5" />
+              BOUNTIES ({filteredRequests.length})
+            </div>
           </button>
           <button
             onClick={() => setActiveTab('portfolio')}
-            className={`pb-3 px-4 font-medium transition-colors flex items-center gap-2 ${
+            className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
               activeTab === 'portfolio'
-                ? 'border-b-2 border-purple-500 text-purple-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-[0_0_20px_rgba(34,197,94,0.5)]'
+                : 'bg-white/10 text-white/60 hover:bg-white/20'
             }`}
           >
-            <Sparkles className="w-4 h-4" />
-            My Portfolio
-            <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">
-              {portfolio.filter(p => p.autoSubmit).length} Active
-            </span>
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              MY CONTENT ({portfolio.filter(p => p.autoSubmit).length})
+            </div>
           </button>
         </div>
 
-        {/* Search and Filters */}
+        {/* Minimal Search */}
         {activeTab === 'browse' && (
-          <div className="mb-6 space-y-4">
-            <div className="flex gap-4">
-              <div className="flex-1 relative">
-                <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search requests by title or description..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
-                  showFilters
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-white border border-purple-200 text-gray-700 hover:bg-purple-50'
-                }`}
-              >
-                <Filter className="w-4 h-4" />
-                Filters
-              </button>
-            </div>
-
-            {showFilters && (
-              <div className="bg-white rounded-xl border border-purple-200 p-6 space-y-4">
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500"
-                    >
-                      {categories.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500"
-                    >
-                      <option value="newest">Newest First</option>
-                      <option value="bounty-high">Highest Bounty</option>
-                      <option value="bounty-low">Lowest Bounty</option>
-                      <option value="deadline">Deadline (Soon)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Bounty Range: ${bountyRange[0]} - ${bountyRange[1]}
-                    </label>
-                    <div className="flex gap-3">
-                      <input
-                        type="number"
-                        value={bountyRange[0]}
-                        onChange={(e) => setBountyRange([parseInt(e.target.value) || 0, bountyRange[1]])}
-                        className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500"
-                        placeholder="Min"
-                      />
-                      <input
-                        type="number"
-                        value={bountyRange[1]}
-                        onChange={(e) => setBountyRange([bountyRange[0], parseInt(e.target.value) || 1000])}
-                        className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500"
-                        placeholder="Max"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between text-sm text-gray-600">
-              <span>Showing {filteredRequests.length} of {requests.length} requests</span>
-              {aiEnabled && (
-                <div className="flex items-center gap-2 text-green-600">
-                  <Sparkles className="w-4 h-4" />
-                  <span>AI Auto-Submit Active</span>
-                </div>
-              )}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="w-5 h-5 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search bounties..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+              />
             </div>
           </div>
         )}
 
-        {/* Portfolio View */}
+        {/* Portfolio View - Simplified */}
         {activeTab === 'portfolio' && (
           <>
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-6 mb-6">
+            <div className="bg-gradient-to-r from-green-500/20 to-emerald-600/20 border-2 border-green-400/30 rounded-2xl p-6 mb-6 backdrop-blur-sm">
               <div className="flex items-start gap-4">
-                <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-xl">
+                <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-3 rounded-xl">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg text-gray-900 mb-2">AI Auto-Submit Portfolio</h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Upload your best work with tags. Our AI automatically submits matching content to new requests, 
-                    letting you earn from the same content multiple times without lifting a finger!
+                  <h3 className="font-black text-xl text-white mb-2">AI Auto-Submit Portfolio</h3>
+                  <p className="text-sm text-white/80 mb-4">
+                    Upload once, earn forever! AI automatically matches your content to new bounties.
                   </p>
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => setShowPortfolioModal(true)}
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:shadow-md transition-all"
+                      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all"
                     >
-                      Upload to Portfolio
+                      + UPLOAD CONTENT
                     </button>
-                    <div className="text-sm text-gray-600">
-                      <strong>{portfolio.filter(p => p.autoSubmit).length}</strong> items active • 
-                      <strong className="text-green-600 ml-1">{portfolio.reduce((sum, p) => sum + p.timesUsed, 0)}</strong> auto-submissions
+                    <div className="text-sm text-white/90 font-bold">
+                      {portfolio.filter(p => p.autoSubmit).length} Active • 
+                      <span className="text-green-400 ml-1">{portfolio.reduce((sum, p) => sum + p.timesUsed, 0)} Matches</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {portfolio.map((item) => {
                 const matchingRequests = requests.filter(r => 
                   r.aiMatched && r.aiMatched.includes(item.id)
                 );
 
                 return (
-                  <div key={item.id} className="bg-white rounded-xl shadow-sm border border-purple-100 hover:shadow-md transition-shadow">
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="text-4xl">{item.thumbnail}</div>
-                        <div className="flex items-center gap-1 text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
-                          <CheckCircle className="w-3 h-3" />
-                          {item.autoSubmit ? 'Auto-Submit ON' : 'Manual'}
+                  <div key={item.id} className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 hover:border-green-400/50 transition-all p-5">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="text-4xl">{item.thumbnail}</div>
+                      <span className="flex items-center gap-1 text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded-full border border-green-400/30 font-bold">
+                        <CheckCircle className="w-3 h-3" />
+                        AUTO-ON
+                      </span>
+                    </div>
+                    
+                    <h3 className="font-bold text-lg mb-2 text-white">{item.title}</h3>
+                    <p className="text-sm text-white/70 mb-3 line-clamp-2">{item.description}</p>
+                    
+                    {matchingRequests.length > 0 && (
+                      <div className="mb-3 p-2 bg-green-500/20 border border-green-400/30 rounded-lg">
+                        <div className="flex items-center gap-1 text-xs text-green-400 font-bold">
+                          <Target className="w-3 h-3" />
+                          MATCHED TO {matchingRequests.length} BOUNTY{matchingRequests.length > 1 ? 'S' : ''}
                         </div>
                       </div>
-                      
-                      <h3 className="font-bold text-lg mb-2 text-gray-900">{item.title}</h3>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
-                      
-                      <div className="mb-3">
-                        <div className="flex flex-wrap gap-1">
-                          {item.tags.slice(0, 4).map((tag, idx) => (
-                            <span key={idx} className="text-xs px-2 py-1 bg-purple-50 text-purple-600 rounded-full">
-                              #{tag}
-                            </span>
-                          ))}
-                          {item.tags.length > 4 && (
-                            <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                              +{item.tags.length - 4}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                    )}
 
-                      {matchingRequests.length > 0 && (
-                        <div className="mb-3 p-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
-                          <div className="flex items-center gap-1 text-xs text-green-700">
-                            <Target className="w-3 h-3" />
-                            <span className="font-medium">Matched to {matchingRequests.length} active request{matchingRequests.length > 1 ? 's' : ''}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <Award className="w-4 h-4 text-purple-500" />
-                          Used {item.timesUsed}x
-                        </div>
-                        <button className="text-sm text-purple-600 hover:text-purple-700 font-medium">
-                          Edit
-                        </button>
+                    <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                      <div className="flex items-center gap-1 text-sm text-white/80 font-bold">
+                        <Award className="w-4 h-4 text-yellow-400" />
+                        Used {item.timesUsed}x
                       </div>
+                      <button className="text-sm text-green-400 hover:text-green-300 font-bold">
+                        EDIT
+                      </button>
                     </div>
                   </div>
                 );
@@ -636,91 +529,81 @@ export default function GlassSlipper() {
           </>
         )}
 
-        {/* Request Cards */}
+        {/* Bounty Cards - Attention Grabbing */}
         {activeTab === 'browse' && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredRequests.map((request) => {
               const matchedItems = getMatchedPortfolioItems(request);
               const bestMatch = matchedItems[0];
 
               return (
-                <div key={request.id} className="bg-white rounded-2xl shadow-sm border border-purple-100 hover:shadow-lg hover:border-purple-200 transition-all">
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <span className="text-xs font-medium px-3 py-1.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full border border-purple-200">
-                        {request.category}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs text-gray-500">
-                        <Clock className="w-3 h-3" />
-                        {request.deadline}
-                      </span>
-                    </div>
-                    
+                <div key={request.id} className="group relative animate-fade-in">
+                  {/* Glow Effect */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-400 rounded-2xl blur-lg opacity-25 group-hover:opacity-75 transition-opacity" />
+                  
+                  <div className="relative bg-gradient-to-br from-purple-900 to-pink-900 rounded-2xl border-2 border-yellow-400/30 hover:border-yellow-400 transition-all overflow-hidden">
+                    {/* AI Match Badge */}
                     {bestMatch && aiEnabled && (
-                      <div className="mb-3">
-                        <div className={`bg-gradient-to-r ${getMatchBadgeColor(bestMatch.matchScore)} p-3 rounded-lg text-white`}>
-                          <div className="flex items-center gap-2 mb-1">
-                            <Zap className="w-4 h-4" />
-                            <span className="text-xs font-bold">AI AUTO-MATCHED</span>
-                          </div>
-                          <div className="text-xs">
-                            "{bestMatch.title}" • {bestMatch.matchScore}% match
-                          </div>
-                          {matchedItems.length > 1 && (
-                            <div className="text-xs mt-1 opacity-90">
-                              +{matchedItems.length - 1} more from your portfolio
-                            </div>
-                          )}
-                        </div>
+                      <div className="absolute top-0 right-0 bg-gradient-to-br from-green-500 to-emerald-600 text-white px-3 py-1 rounded-bl-xl text-xs font-bold flex items-center gap-1 shadow-lg">
+                        <Zap className="w-3 h-3" />
+                        {bestMatch.matchScore}% MATCH
                       </div>
                     )}
-                    
-                    <h3 className="font-bold text-lg mb-2 text-gray-900">{request.title}</h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{request.description}</p>
-                    
-                    <div className="mb-4 pb-4 border-b border-gray-100">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <div className="flex items-center gap-1">
-                            <Crown className="w-5 h-5 text-purple-500" />
-                            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
-                              ${request.bounty}
-                            </span>
-                          </div>
-                          <div className="text-xs text-gray-500">Total Bounty</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-semibold text-gray-900">{request.submissions}</div>
-                          <div className="text-xs text-gray-500">Submissions</div>
-                        </div>
-                      </div>
-                      <div className="bg-purple-50 rounded-lg p-2">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600">You receive:</span>
-                          <span className="font-semibold text-green-600">${calculateCreatorPayout(request.bounty)}</span>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm text-gray-600">by {request.requester}</span>
+                    <div className="p-5">
+                      {/* Bounty Amount - HUGE */}
+                      <div className="mb-4 text-center py-4 bg-black/30 rounded-xl border border-yellow-400/30">
+                        <div className="text-5xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent mb-1">
+                          ${request.bounty}
+                        </div>
+                        <div className="text-xs text-yellow-400 font-bold uppercase tracking-widest">TOTAL BOUNTY</div>
+                      </div>
+
+                      {/* Category Badge */}
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-bold px-2 py-1 bg-yellow-400/20 text-yellow-400 rounded-lg border border-yellow-400/30 uppercase">
+                          {request.category}
+                        </span>
+                        <span className="flex items-center gap-1 text-xs text-white/60 font-medium">
+                          <Clock className="w-3 h-3" />
+                          {request.deadline}
+                        </span>
+                      </div>
+                      
+                      <h3 className="font-bold text-lg mb-2 text-white">{request.title}</h3>
+                      <p className="text-sm text-white/70 mb-4 line-clamp-2">{request.description}</p>
+                      
+                      {/* Your Payout */}
+                      <div className="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-xl">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-green-400 font-bold uppercase">You Get:</span>
+                          <span className="text-2xl font-black text-green-400">${calculateCreatorPayout(request.bounty)}</span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
                       <div className="flex gap-2">
                         {request.requester === 'You' && (
                           <button
                             onClick={() => setShowSubmissionsManagement({ id: request.id, title: request.title })}
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5"
+                            className="flex-1 bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 border border-white/20"
                           >
-                            <FileCheck className="w-3.5 h-3.5" />
-                            Review
+                            <FileCheck className="w-4 h-4" />
+                            REVIEW
                           </button>
                         )}
                         <button
                           onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
-                          className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:shadow-md transition-all flex items-center gap-1.5"
+                          className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-black px-4 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-[0_0_30px_rgba(251,191,36,0.5)]"
                         >
-                          <LinkIcon className="w-3.5 h-3.5" />
-                          Submit Link
+                          <LinkIcon className="w-4 h-4" />
+                          SUBMIT NOW
                         </button>
+                      </div>
+
+                      {/* Submissions Count */}
+                      <div className="mt-3 text-center text-xs text-white/50">
+                        {request.submissions} submissions
                       </div>
                     </div>
                   </div>
@@ -730,11 +613,9 @@ export default function GlassSlipper() {
 
             {filteredRequests.length === 0 && (
               <div className="col-span-full text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Search className="w-16 h-16 mx-auto" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">No requests found</h3>
-                <p className="text-gray-600">Try adjusting your filters or search query</p>
+                <Search className="w-16 h-16 mx-auto text-white/20 mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">No bounties found</h3>
+                <p className="text-white/60">Try a different search</p>
               </div>
             )}
           </div>
@@ -918,115 +799,128 @@ export default function GlassSlipper() {
         </div>
       )}
 
-      {/* Create Request Modal */}
+      {/* Create Request Modal - Exciting */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-pink-50">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gradient-to-br from-purple-900 to-pink-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-yellow-400">
+            <div className="p-6 border-b border-yellow-400/30 bg-gradient-to-r from-yellow-400/20 to-orange-500/20">
               <div className="flex items-center gap-3 mb-2">
-                <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-lg">
-                  <Crown className="w-5 h-5 text-white" />
+                <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-3 rounded-xl shadow-lg">
+                  <Crown className="w-6 h-6 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Post Your Request</h2>
+                <div>
+                  <h2 className="text-2xl font-black text-white">POST YOUR BOUNTY</h2>
+                  <p className="text-sm text-yellow-400 font-bold">AI instantly matches with creators!</p>
+                </div>
               </div>
-              <p className="text-sm text-gray-600 italic">AI will instantly scan all creator portfolios for matches</p>
             </div>
             
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">What Are You Looking For?</label>
+                <label className="block text-sm font-bold text-white mb-2">What Do You Need?</label>
                 <input
                   type="text"
                   value={newRequest.title}
                   onChange={(e) => setNewRequest({ ...newRequest, title: e.target.value })}
                   placeholder="e.g., Sunset Beach Photography"
-                  className="w-full px-4 py-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                <select
-                  value={newRequest.category}
-                  onChange={(e) => setNewRequest({ ...newRequest, category: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  {categories.filter(c => c !== 'All').map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Detailed Description</label>
-                <textarea
-                  value={newRequest.description}
-                  onChange={(e) => setNewRequest({ ...newRequest, description: e.target.value })}
-                  placeholder="Be specific about what you want. The more detail, the better the AI matching..."
-                  rows={4}
-                  className="w-full px-4 py-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Bounty Amount ($)</label>
+              {/* HUGE Bounty Input */}
+              <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border-2 border-yellow-400/30 rounded-2xl p-6">
+                <label className="block text-center text-sm font-black text-yellow-400 mb-3 uppercase tracking-widest">
+                  💰 SET YOUR BOUNTY 💰
+                </label>
+                <div className="relative">
+                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-black text-white">$</span>
                   <input
                     type="number"
                     value={newRequest.bounty}
                     onChange={(e) => setNewRequest({ ...newRequest, bounty: e.target.value })}
-                    placeholder="100"
-                    className="w-full px-4 py-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="500"
+                    className="w-full pl-16 pr-6 py-6 bg-black/30 border-2 border-yellow-400 rounded-xl text-5xl font-black text-center text-white placeholder-white/30 focus:ring-4 focus:ring-yellow-400/50 focus:border-yellow-400"
                   />
                 </div>
+                {newRequest.bounty && (
+                  <div className="mt-4 p-3 bg-black/30 rounded-lg">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-white/70 font-medium">Creator gets:</span>
+                      <span className="text-2xl font-black text-green-400">
+                        ${calculateCreatorPayout(parseInt(newRequest.bounty))}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs mt-1">
+                      <span className="text-white/50">Platform fee (20%):</span>
+                      <span className="text-white/70 font-bold">
+                        ${calculateCommission(parseInt(newRequest.bounty))}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Deadline (days)</label>
+                  <label className="block text-sm font-bold text-white mb-2">Category</label>
+                  <select
+                    value={newRequest.category}
+                    onChange={(e) => setNewRequest({ ...newRequest, category: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+                  >
+                    {categories.filter(c => c !== 'All').map(cat => (
+                      <option key={cat} value={cat} className="bg-purple-900">{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-white mb-2">Deadline</label>
                   <input
                     type="number"
                     value={newRequest.deadline}
                     onChange={(e) => setNewRequest({ ...newRequest, deadline: e.target.value })}
                     placeholder="3"
-                    className="w-full px-4 py-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
                   />
+                  <p className="text-xs text-white/50 mt-1">days</p>
                 </div>
               </div>
 
-              {newRequest.bounty && (
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4">
-                  <div className="bg-white/60 rounded-lg p-3 border border-purple-200">
-                    <div className="text-xs font-medium text-gray-700 mb-2">Payment Breakdown:</div>
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Total bounty:</span>
-                        <span className="font-semibold text-gray-900">${newRequest.bounty}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Winner receives:</span>
-                        <span className="font-semibold text-green-600">${calculateCreatorPayout(parseFloat(newRequest.bounty))}</span>
-                      </div>
-                      <div className="flex justify-between border-t border-gray-200 pt-1 mt-1">
-                        <span className="text-gray-600">Platform fee (20%):</span>
-                        <span className="font-medium text-purple-600">${calculateCommission(parseFloat(newRequest.bounty))}</span>
-                      </div>
-                    </div>
+              <div>
+                <label className="block text-sm font-bold text-white mb-2">Detailed Description</label>
+                <textarea
+                  value={newRequest.description}
+                  onChange={(e) => setNewRequest({ ...newRequest, description: e.target.value })}
+                  placeholder="Be specific! Better details = better AI matches..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 resize-none"
+                />
+              </div>
+
+              <div className="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4">
+                <div className="flex gap-2">
+                  <Sparkles className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                  <div className="text-sm text-blue-400">
+                    <strong className="text-white">AI is standing by!</strong> Once posted, your request will be instantly matched with creator portfolios. You'll get submissions within minutes!
                   </div>
                 </div>
-              )}
+              </div>
             </div>
 
-            <div className="p-6 border-t border-purple-100 flex gap-3 bg-gray-50">
+            <div className="p-6 border-t border-yellow-400/30 flex gap-3 bg-black/30">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="flex-1 px-6 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-white transition-colors"
+                className="flex-1 px-6 py-4 border-2 border-white/20 rounded-xl font-bold text-white hover:bg-white/10 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateRequest}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black rounded-xl font-black hover:shadow-[0_0_40px_rgba(251,191,36,0.6)] transition-all flex items-center justify-center gap-2 text-lg"
               >
-                <Sparkles className="w-4 h-4" />
-                Post & Find Matches
+                <Crown className="w-5 h-5" />
+                POST BOUNTY
               </button>
             </div>
           </div>
