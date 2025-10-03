@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { DollarSign, Send } from 'lucide-react';
+import { contributionSchema } from '@/lib/validation';
 
 interface ContributeToBountyModalProps {
   isOpen: boolean;
@@ -32,15 +33,23 @@ export function ContributeToBountyModal({
   const handleSubmit = async () => {
     const contributionAmount = parseFloat(amount);
     
-    if (!contributionAmount || contributionAmount <= 0) {
+    // Validate with Zod schema
+    const validation = contributionSchema.safeParse({
+      amount: contributionAmount,
+      message: message || undefined,
+    });
+
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
       toast({
-        title: 'Invalid amount',
-        description: 'Please enter a valid contribution amount',
+        title: 'Validation Error',
+        description: firstError.message,
         variant: 'destructive',
       });
       return;
     }
 
+    // Additional minimum contribution check
     if (minimumContribution > 0 && contributionAmount < minimumContribution) {
       toast({
         title: 'Amount too low',
@@ -60,8 +69,8 @@ export function ContributeToBountyModal({
         .insert({
           request_id: requestId,
           contributor_id: user.id,
-          amount: contributionAmount,
-          message: message.trim() || null,
+          amount: validation.data.amount,
+          message: validation.data.message || null,
         });
 
       if (error) throw error;
@@ -75,10 +84,9 @@ export function ContributeToBountyModal({
       setMessage('');
       onClose();
     } catch (error) {
-      console.error('Error submitting contribution:', error);
       toast({
         title: 'Failed to contribute',
-        description: error instanceof Error ? error.message : 'An error occurred',
+        description: 'An error occurred while processing your contribution',
         variant: 'destructive',
       });
     } finally {

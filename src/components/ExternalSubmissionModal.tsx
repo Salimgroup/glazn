@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { externalSubmissionSchema } from '@/lib/validation';
 
 interface ExternalSubmissionModalProps {
   requestId: string;
@@ -30,8 +31,12 @@ export function ExternalSubmissionModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.externalUrl || !formData.title) {
-      toast.error('Please fill in required fields');
+    // Validate with Zod schema
+    const validation = externalSubmissionSchema.safeParse(formData);
+
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
@@ -45,17 +50,19 @@ export function ExternalSubmissionModal({
         return;
       }
 
+      const validatedData = validation.data;
+
       const { error } = await supabase
         .from('submissions')
         .insert({
           request_id: requestId,
           creator_id: user.id,
           submission_type: 'external_url',
-          external_url: formData.externalUrl,
-          platform_name: formData.platformName,
-          title: formData.title,
-          description: formData.description,
-          preview_notes: formData.previewNotes,
+          external_url: validatedData.externalUrl,
+          platform_name: validatedData.platformName || null,
+          title: validatedData.title,
+          description: validatedData.description || null,
+          preview_notes: validatedData.previewNotes || null,
           status: 'pending'
         });
 
@@ -65,7 +72,6 @@ export function ExternalSubmissionModal({
       onSubmit();
       onClose();
     } catch (error) {
-      console.error('Error submitting:', error);
       toast.error('Failed to submit. Please try again.');
     } finally {
       setSubmitting(false);

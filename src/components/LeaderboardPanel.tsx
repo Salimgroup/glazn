@@ -9,9 +9,9 @@ interface Profile {
   display_name: string;
   verified: boolean;
   reputation_score: number;
-  total_earnings: number;
-  total_spent: number;
   bounties_completed: number;
+  bounties_posted: number;
+  success_rate: number;
 }
 
 export function LeaderboardPanel() {
@@ -23,20 +23,21 @@ export function LeaderboardPanel() {
   }, []);
 
   const loadLeaderboards = async () => {
+    // Use public_profiles view to avoid exposing financial data
     const { data: creators } = await supabase
-      .from('profiles')
+      .from('public_profiles')
       .select('*')
-      .order('total_earnings', { ascending: false })
+      .order('bounties_completed', { ascending: false })
       .limit(10);
 
     const { data: requesters } = await supabase
-      .from('profiles')
+      .from('public_profiles')
       .select('*')
-      .order('total_spent', { ascending: false })
+      .order('bounties_posted', { ascending: false })
       .limit(10);
 
-    if (creators) setTopCreators(creators);
-    if (requesters) setTopRequesters(requesters);
+    if (creators) setTopCreators(creators as any);
+    if (requesters) setTopRequesters(requesters as any);
   };
 
   const getRankIcon = (index: number) => {
@@ -67,8 +68,8 @@ export function LeaderboardPanel() {
             </div>
             <p className="text-xs text-muted-foreground">
               {type === 'creator'
-                ? `${profile.bounties_completed} completed • $${profile.total_earnings.toLocaleString()} earned`
-                : `$${profile.total_spent.toLocaleString()} spent`}
+                ? `${profile.bounties_completed} completed`
+                : `${profile.bounties_posted} posted`}
             </p>
           </div>
           <div className="text-right">
