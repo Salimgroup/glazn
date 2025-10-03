@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy } from 'lucide-react';
+import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy, Link as LinkIcon, FileCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { StatusBadge, StatusProgress } from '@/components/StatusBadge';
 import { useUserSpending } from '@/hooks/useUserSpending';
+import { ExternalSubmissionModal } from '@/components/ExternalSubmissionModal';
+import { SubmissionsManagementModal } from '@/components/SubmissionsManagementModal';
 import {
   Dialog,
   DialogContent,
@@ -125,6 +127,8 @@ export default function GlassSlipper() {
   const [showAISettings, setShowAISettings] = useState(false);
   const [aiEnabled, setAiEnabled] = useState(true);
   const [autoSubmissions, setAutoSubmissions] = useState<any[]>([]);
+  const [showExternalSubmission, setShowExternalSubmission] = useState<{ id: number; title: string } | null>(null);
+  const [showSubmissionsManagement, setShowSubmissionsManagement] = useState<{ id: number; title: string } | null>(null);
 
   const [newPortfolioItem, setNewPortfolioItem] = useState({
     title: '',
@@ -698,12 +702,26 @@ export default function GlassSlipper() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <span className="text-sm text-gray-600">by {request.requester}</span>
-                      <button className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:shadow-md transition-all flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        Submit
-                      </button>
+                      <div className="flex gap-2">
+                        {request.requester === 'You' && (
+                          <button
+                            onClick={() => setShowSubmissionsManagement({ id: request.id, title: request.title })}
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5"
+                          >
+                            <FileCheck className="w-3.5 h-3.5" />
+                            Review
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
+                          className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:shadow-md transition-all flex items-center gap-1.5"
+                        >
+                          <LinkIcon className="w-3.5 h-3.5" />
+                          Submit Link
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1013,6 +1031,27 @@ export default function GlassSlipper() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* External Submission Modal */}
+      {showExternalSubmission && (
+        <ExternalSubmissionModal
+          requestId={showExternalSubmission.id.toString()}
+          requestTitle={showExternalSubmission.title}
+          onClose={() => setShowExternalSubmission(null)}
+          onSubmit={() => {
+            toast.success('Submission sent for review!');
+          }}
+        />
+      )}
+
+      {/* Submissions Management Modal */}
+      {showSubmissionsManagement && (
+        <SubmissionsManagementModal
+          requestId={showSubmissionsManagement.id.toString()}
+          requestTitle={showSubmissionsManagement.title}
+          onClose={() => setShowSubmissionsManagement(null)}
+        />
       )}
 
       {/* Status Modal */}
