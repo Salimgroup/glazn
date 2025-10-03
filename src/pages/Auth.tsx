@@ -25,42 +25,51 @@ export default function Auth() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-space flex items-center justify-center">
         <div className="animate-pulse">
-          <Crown className="w-12 h-12 text-purple-500" />
+          <Crown className="w-12 h-12 text-neon-pink" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl border border-purple-200 p-8">
+    <div className="min-h-screen bg-gradient-space flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated Background Stars */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-20 left-10 w-2 h-2 bg-neon-cyan rounded-full animate-pulse" />
+        <div className="absolute top-40 right-20 w-1 h-1 bg-neon-yellow rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-32 left-1/4 w-2 h-2 bg-neon-pink rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-60 right-1/3 w-1 h-1 bg-neon-purple rounded-full animate-pulse" style={{ animationDelay: '1.5s' }} />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="bg-card/80 backdrop-blur-xl rounded-2xl border-2 border-neon-pink/40 p-8 shadow-neon">
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <div className="relative">
-              <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 p-4 rounded-2xl">
+              <div className="absolute inset-0 bg-gradient-neon rounded-2xl blur-xl opacity-75" />
+              <div className="relative bg-gradient-neon p-4 rounded-2xl shadow-neon">
                 <Crown className="w-12 h-12 text-white" />
               </div>
-              <Sparkles className="w-6 h-6 text-yellow-400 absolute -top-2 -right-2 animate-pulse" />
+              <Sparkles className="w-6 h-6 text-neon-yellow absolute -top-2 -right-2 animate-pulse" />
             </div>
           </div>
 
           {/* Title */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-3xl font-black bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-cyan bg-clip-text text-transparent mb-2 animate-pulse">
               Welcome to GlassSlipper
             </h1>
             <p className="text-muted-foreground">
-              Sign in to start matching and earning
+              Enter the cosmic bounty marketplace
             </p>
           </div>
 
           {/* Google Sign In Button */}
           <Button
             onClick={handleGoogleSignIn}
-            className="w-full h-12 text-base font-medium"
+            className="w-full h-12 text-base font-black bg-gradient-to-r from-neon-pink to-neon-purple hover:from-neon-purple hover:to-neon-pink shadow-neon hover:shadow-glow transition-all duration-300"
             size="lg"
           >
             <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -91,15 +100,17 @@ export default function Auth() {
         </div>
 
         {/* AI Feature Highlight */}
-        <div className="mt-6 bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-purple-100">
+        <div className="mt-6 bg-card/60 backdrop-blur-xl rounded-xl p-4 border-2 border-neon-cyan/40 shadow-cyan">
           <div className="flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
+            <div className="bg-gradient-to-br from-neon-cyan to-neon-purple p-2 rounded-lg">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
             <div>
-              <p className="text-sm font-medium text-foreground mb-1">
-                AI-Powered Matching
+              <p className="text-sm font-bold text-foreground mb-1 bg-gradient-to-r from-neon-cyan to-neon-pink bg-clip-text text-transparent">
+                AI-Powered Cosmic Matching
               </p>
               <p className="text-xs text-muted-foreground">
-                Our AI automatically matches your portfolio with relevant requests. Upload once, earn forever.
+                Our quantum AI automatically matches your portfolio with relevant requests across the galaxy. Upload once, earn forever.
               </p>
             </div>
           </div>

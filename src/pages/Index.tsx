@@ -8,6 +8,10 @@ import { StatusBadge, StatusProgress } from '@/components/StatusBadge';
 import { useUserSpending } from '@/hooks/useUserSpending';
 import { ExternalSubmissionModal } from '@/components/ExternalSubmissionModal';
 import { SubmissionsManagementModal } from '@/components/SubmissionsManagementModal';
+import { UserAvatar } from '@/components/UserAvatar';
+import { BountyTicker } from '@/components/BountyTicker';
+import { InfluencerBounties } from '@/components/InfluencerBounties';
+import { ShareableBountyLink } from '@/components/ShareableBountyLink';
 import {
   Dialog,
   DialogContent,
@@ -129,6 +133,7 @@ export default function GlassSlipper() {
   const [autoSubmissions, setAutoSubmissions] = useState<any[]>([]);
   const [showExternalSubmission, setShowExternalSubmission] = useState<{ id: number; title: string } | null>(null);
   const [showSubmissionsManagement, setShowSubmissionsManagement] = useState<{ id: number; title: string } | null>(null);
+  const [shareableBounty, setShareableBounty] = useState<{ id: number; title: string } | null>(null);
 
   const [newPortfolioItem, setNewPortfolioItem] = useState({
     title: '',
@@ -315,8 +320,23 @@ export default function GlassSlipper() {
     return 'from-blue-500 to-cyan-500';
   };
 
+  const handleInfluencerBounty = (influencer: any) => {
+    setNewRequest({
+      title: `${influencer.category} Content by ${influencer.name}`,
+      description: `Looking for premium ${influencer.category.toLowerCase()} content from ${influencer.name} (${influencer.handle}). ${influencer.followers} followers on ${influencer.platform}.`,
+      bounty: influencer.suggestedBounty.toString(),
+      category: influencer.category.split(' ')[0],
+      deadline: '7'
+    });
+    setActiveTab('browse');
+    setShowCreateModal(true);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-800">
+    <div className="min-h-screen bg-gradient-space">
+      {/* Bounty Ticker */}
+      <BountyTicker bounties={requests.map(r => ({ id: r.id, title: r.title, bounty: r.bounty }))} />
+
       {/* Floating Rank Badge */}
       {user && spending && (
         <button
@@ -324,15 +344,15 @@ export default function GlassSlipper() {
           className="fixed top-4 right-4 z-50 group animate-fade-in"
         >
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
-            <div className="relative bg-gradient-to-br from-purple-600 to-pink-600 px-6 py-3 rounded-2xl border-2 border-yellow-400 shadow-2xl hover:scale-105 transition-transform">
+            <div className="absolute inset-0 bg-gradient-neon rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity shadow-neon" />
+            <div className="relative bg-card/90 backdrop-blur-xl px-6 py-3 rounded-2xl border-2 border-neon-pink shadow-neon hover:scale-105 transition-transform">
               <div className="flex items-center gap-3">
-                <Trophy className="w-6 h-6 text-yellow-400" />
+                <Trophy className="w-6 h-6 text-neon-yellow" />
                 <div className="text-left">
-                  <div className="text-xs text-yellow-400 font-bold uppercase tracking-wider">
+                  <div className="text-xs text-neon-yellow font-bold uppercase tracking-wider">
                     {spending.current_tier}
                   </div>
-                  <div className="text-2xl font-black text-white">
+                  <div className="text-2xl font-black text-foreground">
                     ${spending.points}
                   </div>
                 </div>
@@ -348,17 +368,18 @@ export default function GlassSlipper() {
       )}
 
       {/* Compact Header */}
-      <header className="bg-black/30 backdrop-blur-xl border-b border-white/10 sticky top-0 z-40">
+      <header className="bg-card/40 backdrop-blur-xl border-b border-neon-pink/30 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <UserAvatar ethnicity="mixed" size="md" />
               <div className="relative">
-                <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 rounded-xl">
+                <div className="bg-gradient-neon p-2 rounded-xl shadow-neon">
                   <Crown className="w-6 h-6 text-white" />
                 </div>
-                <Sparkles className="w-3 h-3 text-yellow-300 absolute -top-1 -right-1 animate-pulse" />
+                <Sparkles className="w-3 h-3 text-neon-yellow absolute -top-1 -right-1 animate-pulse" />
               </div>
-              <h1 className="text-xl font-black bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">
+              <h1 className="text-xl font-black bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-cyan bg-clip-text text-transparent">
                 GlassSlipper
               </h1>
             </div>
@@ -366,7 +387,7 @@ export default function GlassSlipper() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-bold hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all flex items-center gap-2 animate-pulse"
+                className="bg-gradient-neon text-white px-6 py-2 rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-2"
               >
                 <Crown className="w-4 h-4" />
                 POST BOUNTY
@@ -379,9 +400,9 @@ export default function GlassSlipper() {
                 }}
                 variant="outline"
                 size="icon"
-                className="border-white/20 hover:bg-white/10"
+                className="border-neon-cyan/40 hover:bg-neon-cyan/10 hover:shadow-cyan"
               >
-                <LogOut className="w-4 h-4 text-white" />
+                <LogOut className="w-4 h-4 text-neon-cyan" />
               </Button>
             </div>
           </div>
@@ -389,20 +410,26 @@ export default function GlassSlipper() {
       </header>
 
       {/* Hero Stats Bar */}
-      <div className="bg-gradient-to-r from-yellow-500 via-orange-500 to-pink-500 py-4 shadow-2xl">
+      <div className="bg-gradient-cyber py-4 shadow-neon border-b border-neon-cyan/30">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-black/20 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-              <div className="text-3xl font-black text-white mb-1">${requests.reduce((sum, r) => sum + r.bounty, 0).toLocaleString()}</div>
-              <div className="text-xs font-bold text-white/90 uppercase tracking-wider">Total Bounties</div>
+            <div className="bg-card/40 backdrop-blur-sm rounded-xl p-3 border-2 border-neon-pink/40">
+              <div className="text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-1">
+                ${requests.reduce((sum, r) => sum + r.bounty, 0).toLocaleString()}
+              </div>
+              <div className="text-xs font-bold text-neon-yellow uppercase tracking-wider">Total Bounties</div>
             </div>
-            <div className="bg-black/20 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-              <div className="text-3xl font-black text-white mb-1">{filteredRequests.length}</div>
-              <div className="text-xs font-bold text-white/90 uppercase tracking-wider">Active Requests</div>
+            <div className="bg-card/40 backdrop-blur-sm rounded-xl p-3 border-2 border-neon-purple/40">
+              <div className="text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-1">
+                {filteredRequests.length}
+              </div>
+              <div className="text-xs font-bold text-neon-cyan uppercase tracking-wider">Active Requests</div>
             </div>
-            <div className="bg-black/20 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-              <div className="text-3xl font-black text-white mb-1">{portfolio.reduce((sum, p) => sum + p.timesUsed, 0)}</div>
-              <div className="text-xs font-bold text-white/90 uppercase tracking-wider">AI Matches</div>
+            <div className="bg-card/40 backdrop-blur-sm rounded-xl p-3 border-2 border-neon-cyan/40">
+              <div className="text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-1">
+                {portfolio.reduce((sum, p) => sum + p.timesUsed, 0)}
+              </div>
+              <div className="text-xs font-bold text-neon-pink uppercase tracking-wider">AI Matches</div>
             </div>
           </div>
         </div>
@@ -416,8 +443,8 @@ export default function GlassSlipper() {
             onClick={() => setActiveTab('browse')}
             className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
               activeTab === 'browse'
-                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-[0_0_20px_rgba(251,191,36,0.5)]'
-                : 'bg-white/10 text-white/60 hover:bg-white/20'
+                ? 'bg-gradient-neon text-white shadow-neon border-2 border-neon-pink'
+                : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
             }`}
           >
             <div className="flex items-center justify-center gap-2">
@@ -426,11 +453,24 @@ export default function GlassSlipper() {
             </div>
           </button>
           <button
+            onClick={() => setActiveTab('influencers')}
+            className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
+              activeTab === 'influencers'
+                ? 'bg-gradient-to-r from-neon-yellow to-neon-cyan text-space-dark shadow-cyan border-2 border-neon-cyan'
+                : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Crown className="w-5 h-5" />
+              INFLUENCERS
+            </div>
+          </button>
+          <button
             onClick={() => setActiveTab('portfolio')}
             className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
               activeTab === 'portfolio'
-                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-[0_0_20px_rgba(34,197,94,0.5)]'
-                : 'bg-white/10 text-white/60 hover:bg-white/20'
+                ? 'bg-gradient-to-r from-neon-purple to-neon-pink text-white shadow-glow border-2 border-neon-purple'
+                : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
             }`}
           >
             <div className="flex items-center justify-center gap-2">
@@ -444,16 +484,21 @@ export default function GlassSlipper() {
         {activeTab === 'browse' && (
           <div className="mb-6">
             <div className="relative">
-              <Search className="w-5 h-5 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+              <Search className="w-5 h-5 text-neon-cyan absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search bounties..."
+                placeholder="Search bounties in the cosmos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 bg-card/60 backdrop-blur-sm border-2 border-neon-purple/40 rounded-xl text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-neon-pink focus:border-neon-pink"
               />
             </div>
           </div>
+        )}
+
+        {/* Influencers Tab */}
+        {activeTab === 'influencers' && (
+          <InfluencerBounties onCreateBounty={handleInfluencerBounty} />
         )}
 
         {/* Portfolio View - Simplified */}
@@ -539,12 +584,12 @@ export default function GlassSlipper() {
               return (
                 <div key={request.id} className="group relative animate-fade-in">
                   {/* Glow Effect */}
-                  <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-400 rounded-2xl blur-lg opacity-25 group-hover:opacity-75 transition-opacity" />
+                  <div className="absolute -inset-1 bg-gradient-neon rounded-2xl blur-lg opacity-25 group-hover:opacity-100 transition-opacity" />
                   
-                  <div className="relative bg-gradient-to-br from-purple-900 to-pink-900 rounded-2xl border-2 border-yellow-400/30 hover:border-yellow-400 transition-all overflow-hidden">
+                  <div className="relative bg-card/80 backdrop-blur-xl rounded-2xl border-2 border-neon-pink/40 hover:border-neon-cyan transition-all overflow-hidden shadow-neon">
                     {/* AI Match Badge */}
                     {bestMatch && aiEnabled && (
-                      <div className="absolute top-0 right-0 bg-gradient-to-br from-green-500 to-emerald-600 text-white px-3 py-1 rounded-bl-xl text-xs font-bold flex items-center gap-1 shadow-lg">
+                      <div className="absolute top-0 right-0 bg-gradient-to-br from-neon-cyan to-neon-purple text-white px-3 py-1 rounded-bl-xl text-xs font-bold flex items-center gap-1 shadow-cyan">
                         <Zap className="w-3 h-3" />
                         {bestMatch.matchScore}% MATCH
                       </div>
@@ -552,58 +597,68 @@ export default function GlassSlipper() {
 
                     <div className="p-5">
                       {/* Bounty Amount - HUGE */}
-                      <div className="mb-4 text-center py-4 bg-black/30 rounded-xl border border-yellow-400/30">
-                        <div className="text-5xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent mb-1">
+                      <div className="mb-4 text-center py-4 bg-gradient-to-r from-neon-pink/20 to-neon-purple/20 rounded-xl border-2 border-neon-yellow/40">
+                        <div className="text-5xl font-black text-transparent bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-cyan bg-clip-text mb-1">
                           ${request.bounty}
                         </div>
-                        <div className="text-xs text-yellow-400 font-bold uppercase tracking-widest">TOTAL BOUNTY</div>
+                        <div className="text-xs text-neon-yellow font-bold uppercase tracking-widest">TOTAL BOUNTY</div>
                       </div>
 
                       {/* Category Badge */}
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-bold px-2 py-1 bg-yellow-400/20 text-yellow-400 rounded-lg border border-yellow-400/30 uppercase">
+                        <span className="text-xs font-bold px-2 py-1 bg-neon-cyan/20 text-neon-cyan rounded-lg border border-neon-cyan/30 uppercase">
                           {request.category}
                         </span>
-                        <span className="flex items-center gap-1 text-xs text-white/60 font-medium">
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
                           <Clock className="w-3 h-3" />
                           {request.deadline}
                         </span>
                       </div>
                       
-                      <h3 className="font-bold text-lg mb-2 text-white">{request.title}</h3>
-                      <p className="text-sm text-white/70 mb-4 line-clamp-2">{request.description}</p>
+                      <h3 className="font-bold text-lg mb-2 text-foreground">{request.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{request.description}</p>
                       
                       {/* Your Payout */}
-                      <div className="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-xl">
+                      <div className="mb-4 p-3 bg-gradient-to-r from-neon-purple/20 to-neon-pink/20 border-2 border-neon-purple/40 rounded-xl">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-green-400 font-bold uppercase">You Get:</span>
-                          <span className="text-2xl font-black text-green-400">${calculateCreatorPayout(request.bounty)}</span>
+                          <span className="text-xs text-neon-purple font-bold uppercase">You Get:</span>
+                          <span className="text-2xl font-black text-transparent bg-gradient-neon bg-clip-text">${calculateCreatorPayout(request.bounty)}</span>
                         </div>
                       </div>
 
                       {/* Actions */}
                       <div className="flex gap-2">
                         {request.requester === 'You' && (
+                          <>
+                            <button
+                              onClick={() => setShowSubmissionsManagement({ id: request.id, title: request.title })}
+                              className="flex-1 bg-card/60 hover:bg-card/80 text-foreground px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 border-2 border-neon-purple/40"
+                            >
+                              <FileCheck className="w-4 h-4" />
+                              REVIEW
+                            </button>
+                            <button
+                              onClick={() => setShareableBounty({ id: request.id, title: request.title })}
+                              className="bg-gradient-to-r from-neon-cyan to-neon-purple hover:from-neon-purple hover:to-neon-cyan text-white px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-cyan"
+                            >
+                              <LinkIcon className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                        {request.requester !== 'You' && (
                           <button
-                            onClick={() => setShowSubmissionsManagement({ id: request.id, title: request.title })}
-                            className="flex-1 bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 border border-white/20"
+                            onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
+                            className="flex-1 bg-gradient-neon hover:shadow-glow text-white px-4 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 shadow-neon"
                           >
-                            <FileCheck className="w-4 h-4" />
-                            REVIEW
+                            <LinkIcon className="w-4 h-4" />
+                            SUBMIT NOW
                           </button>
                         )}
-                        <button
-                          onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
-                          className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-black px-4 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-[0_0_30px_rgba(251,191,36,0.5)]"
-                        >
-                          <LinkIcon className="w-4 h-4" />
-                          SUBMIT NOW
-                        </button>
                       </div>
 
                       {/* Submissions Count */}
-                      <div className="mt-3 text-center text-xs text-white/50">
-                        {request.submissions} submissions
+                      <div className="mt-3 text-center text-xs text-muted-foreground">
+                        {request.submissions} cosmic submissions
                       </div>
                     </div>
                   </div>
@@ -613,9 +668,9 @@ export default function GlassSlipper() {
 
             {filteredRequests.length === 0 && (
               <div className="col-span-full text-center py-12">
-                <Search className="w-16 h-16 mx-auto text-white/20 mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">No bounties found</h3>
-                <p className="text-white/60">Try a different search</p>
+                <Search className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
+                <h3 className="text-xl font-bold text-foreground mb-2">No bounties in this sector</h3>
+                <p className="text-muted-foreground">Try searching another quadrant of the cosmos</p>
               </div>
             )}
           </div>
@@ -1034,6 +1089,16 @@ export default function GlassSlipper() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Shareable Bounty Link Modal */}
+      {shareableBounty && (
+        <ShareableBountyLink
+          bountyId={shareableBounty.id}
+          bountyTitle={shareableBounty.title}
+          isOpen={!!shareableBounty}
+          onClose={() => setShareableBounty(null)}
+        />
+      )}
     </div>
   );
 }
