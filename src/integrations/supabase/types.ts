@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_feed: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_feed_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bounty_contributions: {
         Row: {
           amount: number
@@ -55,6 +93,176 @@ export type Database = {
           },
         ]
       }
+      bounty_reactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          reaction_type: string
+          request_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reaction_type: string
+          request_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reaction_type?: string
+          request_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bounty_reactions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bounty_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follows: {
+        Row: {
+          created_at: string | null
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          link: string | null
+          message: string
+          read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          bounties_completed: number | null
+          bounties_posted: number | null
+          created_at: string | null
+          display_name: string | null
+          id: string
+          portfolio_url: string | null
+          reputation_score: number | null
+          success_rate: number | null
+          total_earnings: number | null
+          total_spent: number | null
+          updated_at: string | null
+          username: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          bounties_completed?: number | null
+          bounties_posted?: number | null
+          created_at?: string | null
+          display_name?: string | null
+          id: string
+          portfolio_url?: string | null
+          reputation_score?: number | null
+          success_rate?: number | null
+          total_earnings?: number | null
+          total_spent?: number | null
+          updated_at?: string | null
+          username?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          bounties_completed?: number | null
+          bounties_posted?: number | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          portfolio_url?: string | null
+          reputation_score?: number | null
+          success_rate?: number | null
+          total_earnings?: number | null
+          total_spent?: number | null
+          updated_at?: string | null
+          username?: string | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
       requests: {
         Row: {
           allow_contributions: boolean | null
@@ -63,12 +271,15 @@ export type Database = {
           created_at: string | null
           deadline: string
           description: string
+          featured: boolean | null
           id: string
           minimum_contribution: number | null
           status: string | null
           title: string
+          trending_score: number | null
           updated_at: string | null
           user_id: string
+          view_count: number | null
         }
         Insert: {
           allow_contributions?: boolean | null
@@ -77,12 +288,15 @@ export type Database = {
           created_at?: string | null
           deadline: string
           description: string
+          featured?: boolean | null
           id?: string
           minimum_contribution?: number | null
           status?: string | null
           title: string
+          trending_score?: number | null
           updated_at?: string | null
           user_id: string
+          view_count?: number | null
         }
         Update: {
           allow_contributions?: boolean | null
@@ -91,12 +305,15 @@ export type Database = {
           created_at?: string | null
           deadline?: string
           description?: string
+          featured?: boolean | null
           id?: string
           minimum_contribution?: number | null
           status?: string | null
           title?: string
+          trending_score?: number | null
           updated_at?: string | null
           user_id?: string
+          view_count?: number | null
         }
         Relationships: []
       }

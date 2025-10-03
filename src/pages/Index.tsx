@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy, Link as LinkIcon, FileCheck, DollarSign, Plus, HelpCircle } from 'lucide-react';
+import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy, Link as LinkIcon, FileCheck, DollarSign, Plus, HelpCircle, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,12 @@ import { InfluencerBounties } from '@/components/InfluencerBounties';
 import { ShareableBountyLink } from '@/components/ShareableBountyLink';
 import { ContributeToBountyModal } from '@/components/ContributeToBountyModal';
 import { ContributionsManagementModal } from '@/components/ContributionsManagementModal';
+import { LiveActivityFeed } from '@/components/LiveActivityFeed';
+import { LeaderboardPanel } from '@/components/LeaderboardPanel';
+import { NotificationBell } from '@/components/NotificationBell';
+import { QuickStatsCard } from '@/components/QuickStatsCard';
+import { TrendingBountiesSection } from '@/components/TrendingBountiesSection';
+import { BountyReactions } from '@/components/BountyReactions';
 import {
   Dialog,
   DialogContent,
@@ -393,6 +399,7 @@ export default function Glazn() {
             </div>
             
             <div className="flex items-center gap-2">
+              <NotificationBell />
               <button
                 onClick={() => navigate('/how-to')}
                 className="bg-card/60 hover:bg-card/80 text-foreground px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 border-2 border-neon-cyan/40"
@@ -497,18 +504,52 @@ export default function Glazn() {
 
         {/* Minimal Search */}
         {activeTab === 'browse' && (
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="w-5 h-5 text-neon-cyan absolute left-4 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search bounties in the cosmos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-card/60 backdrop-blur-sm border-2 border-neon-purple/40 rounded-xl text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-neon-pink focus:border-neon-pink"
+          <>
+            {/* Quick Stats Dashboard */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <QuickStatsCard
+                title="Active Bounties"
+                value={filteredRequests.length}
+                change="+12% this week"
+                icon="target"
+                trend="up"
+              />
+              <QuickStatsCard
+                title="Total Volume"
+                value={`$${requests.reduce((sum, r) => sum + r.bounty, 0).toLocaleString()}`}
+                change="+8% this week"
+                icon="dollar"
+                trend="up"
+              />
+              <QuickStatsCard
+                title="Creators Online"
+                value="2,847"
+                change="+24% today"
+                icon="trending"
+                trend="up"
+              />
+              <QuickStatsCard
+                title="Avg Response"
+                value="< 2h"
+                change="Fastest ever"
+                icon="award"
+                trend="up"
               />
             </div>
-          </div>
+
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="w-5 h-5 text-neon-cyan absolute left-4 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search bounties in the cosmos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-card/60 backdrop-blur-sm border-2 border-neon-purple/40 rounded-xl text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-neon-pink focus:border-neon-pink"
+                />
+              </div>
+            </div>
+          </>
         )}
 
         {/* Influencers Tab */}
@@ -589,17 +630,25 @@ export default function Glazn() {
           </>
         )}
 
-        {/* Bounty Cards - Attention Grabbing */}
+        {/* Bounty Cards with Sidebar Layout */}
         {activeTab === 'browse' && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredRequests.map((request) => {
-              const matchedItems = getMatchedPortfolioItems(request);
-              const bestMatch = matchedItems[0];
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left Sidebar - Trending & Activity */}
+            <div className="lg:col-span-1 space-y-6">
+              <TrendingBountiesSection />
+              <LiveActivityFeed />
+            </div>
 
-              return (
-                <div key={request.id} className="group relative animate-fade-in">
-                  {/* Glow Effect */}
-                  <div className="absolute -inset-1 bg-gradient-neon rounded-2xl blur-lg opacity-25 group-hover:opacity-100 transition-opacity" />
+            {/* Main Content - Bounty Cards */}
+            <div className="lg:col-span-1 space-y-4">
+              {filteredRequests.map((request) => {
+                const matchedItems = getMatchedPortfolioItems(request);
+                const bestMatch = matchedItems[0];
+
+                return (
+                  <div key={request.id} className="group relative animate-fade-in">
+                    {/* Glow Effect */}
+                    <div className="absolute -inset-1 bg-gradient-neon rounded-2xl blur-lg opacity-25 group-hover:opacity-100 transition-opacity" />
                   
                   <div className="relative bg-card/80 backdrop-blur-xl rounded-2xl border-2 border-neon-pink/40 hover:border-neon-cyan transition-all overflow-hidden shadow-neon">
                     {/* AI Match Badge */}
@@ -690,6 +739,11 @@ export default function Glazn() {
                         )}
                       </div>
 
+                      {/* Bounty Reactions */}
+                      <div className="mt-4 pt-4 border-t border-neon-purple/20">
+                        <BountyReactions requestId={request.id.toString()} />
+                      </div>
+
                       {/* Submissions Count */}
                       <div className="mt-3 text-center text-xs text-muted-foreground">
                         {request.submissions} cosmic submissions
@@ -708,7 +762,13 @@ export default function Glazn() {
               </div>
             )}
           </div>
-        )}
+
+          {/* Right Sidebar - Leaderboard */}
+          <div className="lg:col-span-1">
+            <LeaderboardPanel />
+          </div>
+        </div>
+      )}
       </div>
 
       {/* Portfolio Upload Modal */}
