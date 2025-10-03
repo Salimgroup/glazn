@@ -95,6 +95,13 @@ export type Database = {
             foreignKeyName: "bounty_contributions_request_id_fkey"
             columns: ["request_id"]
             isOneToOne: false
+            referencedRelation: "content_creator_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bounty_contributions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
             referencedRelation: "requests"
             referencedColumns: ["id"]
           },
@@ -123,6 +130,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "bounty_reactions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "content_creator_requests"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bounty_reactions_request_id_fkey"
             columns: ["request_id"]
@@ -299,8 +313,10 @@ export type Database = {
           bounties_completed: number | null
           bounties_posted: number | null
           created_at: string | null
+          creator_platforms: string[] | null
           display_name: string | null
           id: string
+          is_content_creator: boolean | null
           portfolio_url: string | null
           reputation_score: number | null
           success_rate: number | null
@@ -316,8 +332,10 @@ export type Database = {
           bounties_completed?: number | null
           bounties_posted?: number | null
           created_at?: string | null
+          creator_platforms?: string[] | null
           display_name?: string | null
           id: string
+          is_content_creator?: boolean | null
           portfolio_url?: string | null
           reputation_score?: number | null
           success_rate?: number | null
@@ -333,8 +351,10 @@ export type Database = {
           bounties_completed?: number | null
           bounties_posted?: number | null
           created_at?: string | null
+          creator_platforms?: string[] | null
           display_name?: string | null
           id?: string
+          is_content_creator?: boolean | null
           portfolio_url?: string | null
           reputation_score?: number | null
           success_rate?: number | null
@@ -351,12 +371,15 @@ export type Database = {
           allow_contributions: boolean | null
           bounty: number
           category: string
+          content_creator_id: string | null
           created_at: string | null
           deadline: string
           description: string
           featured: boolean | null
           id: string
+          is_anonymous: boolean | null
           minimum_contribution: number | null
+          platform: string | null
           status: string | null
           title: string
           trending_score: number | null
@@ -368,12 +391,15 @@ export type Database = {
           allow_contributions?: boolean | null
           bounty: number
           category: string
+          content_creator_id?: string | null
           created_at?: string | null
           deadline: string
           description: string
           featured?: boolean | null
           id?: string
+          is_anonymous?: boolean | null
           minimum_contribution?: number | null
+          platform?: string | null
           status?: string | null
           title: string
           trending_score?: number | null
@@ -385,12 +411,15 @@ export type Database = {
           allow_contributions?: boolean | null
           bounty?: number
           category?: string
+          content_creator_id?: string | null
           created_at?: string | null
           deadline?: string
           description?: string
           featured?: boolean | null
           id?: string
+          is_anonymous?: boolean | null
           minimum_contribution?: number | null
+          platform?: string | null
           status?: string | null
           title?: string
           trending_score?: number | null
@@ -532,6 +561,13 @@ export type Database = {
             foreignKeyName: "submissions_request_id_fkey"
             columns: ["request_id"]
             isOneToOne: false
+            referencedRelation: "content_creator_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
             referencedRelation: "requests"
             referencedColumns: ["id"]
           },
@@ -659,6 +695,30 @@ export type Database = {
       }
     }
     Views: {
+      content_creator_requests: {
+        Row: {
+          allow_contributions: boolean | null
+          bounty: number | null
+          category: string | null
+          content_creator_id: string | null
+          created_at: string | null
+          deadline: string | null
+          description: string | null
+          featured: boolean | null
+          id: string | null
+          is_anonymous: boolean | null
+          minimum_contribution: number | null
+          platform: string | null
+          requester_name: string | null
+          status: string | null
+          title: string | null
+          trending_score: number | null
+          updated_at: string | null
+          user_id: string | null
+          view_count: number | null
+        }
+        Relationships: []
+      }
       public_profiles: {
         Row: {
           avatar_url: string | null

@@ -20,6 +20,7 @@ import { NotificationBell } from '@/components/NotificationBell';
 import { QuickStatsCard } from '@/components/QuickStatsCard';
 import { TrendingBountiesSection } from '@/components/TrendingBountiesSection';
 import { BountyReactions } from '@/components/BountyReactions';
+import { ContentCreatorDashboard } from '@/components/ContentCreatorDashboard';
 import {
   Dialog,
   DialogContent,
@@ -490,6 +491,19 @@ export default function Glazn() {
             </div>
           </button>
           <button
+            onClick={() => setActiveTab('creator')}
+            className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
+              activeTab === 'creator'
+                ? 'bg-gradient-to-r from-neon-cyan to-neon-purple text-white shadow-cyan border-2 border-neon-cyan'
+                : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Star className="w-5 h-5" />
+              MY REQUESTS
+            </div>
+          </button>
+          <button
             onClick={() => setActiveTab('portfolio')}
             className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
               activeTab === 'portfolio'
@@ -557,6 +571,11 @@ export default function Glazn() {
         {/* Influencers Tab */}
         {activeTab === 'influencers' && (
           <InfluencerBounties onCreateBounty={handleInfluencerBounty} />
+        )}
+
+        {/* Content Creator Tab */}
+        {activeTab === 'creator' && (
+          <ContentCreatorDashboard />
         )}
 
         {/* Portfolio View - Simplified */}
