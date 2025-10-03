@@ -14,8 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      bounty_contributions: {
+        Row: {
+          amount: number
+          contributor_id: string
+          created_at: string | null
+          id: string
+          message: string | null
+          request_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          contributor_id: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          request_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          contributor_id?: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          request_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bounty_contributions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       requests: {
         Row: {
+          allow_contributions: boolean | null
           bounty: number
           category: string
           created_at: string | null
@@ -28,6 +70,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          allow_contributions?: boolean | null
           bounty: number
           category: string
           created_at?: string | null
@@ -40,6 +83,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          allow_contributions?: boolean | null
           bounty?: number
           category?: string
           created_at?: string | null
@@ -120,7 +164,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_total_bounty: {
+        Args: { request_id_param: string }
+        Returns: number
+      }
     }
     Enums: {
       submission_status: "pending" | "approved" | "rejected"

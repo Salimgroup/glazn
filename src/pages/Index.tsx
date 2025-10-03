@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy, Link as LinkIcon, FileCheck } from 'lucide-react';
+import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy, Link as LinkIcon, FileCheck, DollarSign, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,8 @@ import { UserAvatar } from '@/components/UserAvatar';
 import { BountyTicker } from '@/components/BountyTicker';
 import { InfluencerBounties } from '@/components/InfluencerBounties';
 import { ShareableBountyLink } from '@/components/ShareableBountyLink';
+import { ContributeToBountyModal } from '@/components/ContributeToBountyModal';
+import { ContributionsManagementModal } from '@/components/ContributionsManagementModal';
 import {
   Dialog,
   DialogContent,
@@ -134,6 +136,8 @@ export default function Glazn() {
   const [showExternalSubmission, setShowExternalSubmission] = useState<{ id: number; title: string } | null>(null);
   const [showSubmissionsManagement, setShowSubmissionsManagement] = useState<{ id: number; title: string } | null>(null);
   const [shareableBounty, setShareableBounty] = useState<{ id: number; title: string } | null>(null);
+  const [contributeToBounty, setContributeToBounty] = useState<{ id: number; title: string; bounty: number } | null>(null);
+  const [manageContributions, setManageContributions] = useState<{ id: number; title: string } | null>(null);
 
   const [newPortfolioItem, setNewPortfolioItem] = useState({
     title: '',
@@ -148,7 +152,8 @@ export default function Glazn() {
     description: '',
     bounty: '',
     category: 'Photography',
-    deadline: '3'
+    deadline: '3',
+    allowContributions: true
   });
 
   const categories = ['All', 'Photography', 'Video', 'Digital Art', 'Graphic Design', '3D Rendering', 'Animation', 'Writing', 'Music'];
@@ -281,7 +286,7 @@ export default function Glazn() {
       };
       setRequests([request, ...requests]);
       setShowCreateModal(false);
-      setNewRequest({ title: '', description: '', bounty: '', category: 'Photography', deadline: '3' });
+      setNewRequest({ title: '', description: '', bounty: '', category: 'Photography', deadline: '3', allowContributions: true });
       
       // Add spending and update points
       try {
@@ -326,7 +331,8 @@ export default function Glazn() {
       description: `Looking for premium ${influencer.category.toLowerCase()} content from ${influencer.name} (${influencer.handle}). ${influencer.followers} followers on ${influencer.platform}.`,
       bounty: influencer.suggestedBounty.toString(),
       category: influencer.category.split(' ')[0],
-      deadline: '7'
+      deadline: '7',
+      allowContributions: true
     });
     setActiveTab('browse');
     setShowCreateModal(true);
@@ -628,7 +634,7 @@ export default function Glazn() {
 
                       {/* Actions */}
                       <div className="flex gap-2">
-                        {request.requester === 'You' && (
+                      {request.requester === 'You' && (
                           <>
                             <button
                               onClick={() => setShowSubmissionsManagement({ id: request.id, title: request.title })}
@@ -636,6 +642,12 @@ export default function Glazn() {
                             >
                               <FileCheck className="w-4 h-4" />
                               REVIEW
+                            </button>
+                            <button
+                              onClick={() => setManageContributions({ id: request.id, title: request.title })}
+                              className="bg-card/60 hover:bg-card/80 text-foreground px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 border-2 border-neon-yellow/40"
+                            >
+                              <DollarSign className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => setShareableBounty({ id: request.id, title: request.title })}
@@ -646,13 +658,21 @@ export default function Glazn() {
                           </>
                         )}
                         {request.requester !== 'You' && (
-                          <button
-                            onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
-                            className="flex-1 bg-gradient-neon hover:shadow-glow text-white px-4 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 shadow-neon"
-                          >
-                            <LinkIcon className="w-4 h-4" />
-                            SUBMIT NOW
-                          </button>
+                          <>
+                            <button
+                              onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
+                              className="flex-1 bg-gradient-neon hover:shadow-glow text-white px-4 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 shadow-neon"
+                            >
+                              <LinkIcon className="w-4 h-4" />
+                              SUBMIT
+                            </button>
+                            <button
+                              onClick={() => setContributeToBounty({ id: request.id, title: request.title, bounty: request.bounty })}
+                              className="bg-gradient-to-r from-neon-yellow to-neon-pink hover:shadow-glow text-white px-4 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 shadow-neon"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </>
                         )}
                       </div>
 
@@ -961,6 +981,20 @@ export default function Glazn() {
                   </div>
                 </div>
               </div>
+
+              <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-neon-yellow/20 to-neon-pink/20 border-2 border-neon-yellow/30 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="allowContributions"
+                  checked={newRequest.allowContributions}
+                  onChange={(e) => setNewRequest({ ...newRequest, allowContributions: e.target.checked })}
+                  className="w-5 h-5 text-neon-pink border-neon-yellow/30 rounded focus:ring-neon-yellow"
+                />
+                <label htmlFor="allowContributions" className="text-sm text-white cursor-pointer font-medium">
+                  <strong className="text-neon-yellow">Allow others to contribute to this bounty</strong>
+                  <p className="text-xs text-white/70 mt-1">Contributors can add funds but you maintain full control over accepting submissions</p>
+                </label>
+              </div>
             </div>
 
             <div className="p-6 border-t border-yellow-400/30 flex gap-3 bg-black/30">
@@ -1097,6 +1131,27 @@ export default function Glazn() {
           bountyTitle={shareableBounty.title}
           isOpen={!!shareableBounty}
           onClose={() => setShareableBounty(null)}
+        />
+      )}
+
+      {/* Contribute to Bounty Modal */}
+      {contributeToBounty && (
+        <ContributeToBountyModal
+          isOpen={!!contributeToBounty}
+          onClose={() => setContributeToBounty(null)}
+          requestId={contributeToBounty.id.toString()}
+          requestTitle={contributeToBounty.title}
+          currentBounty={contributeToBounty.bounty}
+        />
+      )}
+
+      {/* Manage Contributions Modal */}
+      {manageContributions && (
+        <ContributionsManagementModal
+          isOpen={!!manageContributions}
+          onClose={() => setManageContributions(null)}
+          requestId={manageContributions.id.toString()}
+          requestTitle={manageContributions.title}
         />
       )}
     </div>
