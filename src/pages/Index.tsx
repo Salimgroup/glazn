@@ -300,7 +300,9 @@ export default function Glazn() {
         await addSpending(bountyAmount);
         toast.success(`✨ Request posted! +${bountyAmount} points earned!`, { duration: 3000 });
       } catch (error) {
-        console.error('Error adding spending:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error adding spending:', error);
+        }
         toast.success('✨ Request posted! AI is now scanning for matches...', { duration: 3000 });
       }
     }

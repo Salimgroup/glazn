@@ -47,7 +47,9 @@ export function SubmissionsManagementModal({
       if (error) throw error;
       setSubmissions(data || []);
     } catch (error) {
-      console.error('Error loading submissions:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error loading submissions:', error);
+      }
       toast.error('Failed to load submissions');
     } finally {
       setLoading(false);
@@ -73,7 +75,9 @@ export function SubmissionsManagementModal({
       toast.success('Content approved! Creator can now use this as deliverable');
       loadSubmissions();
     } catch (error) {
-      console.error('Error approving:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error approving:', error);
+      }
       toast.error('Failed to approve submission');
     } finally {
       setActionLoading(null);
@@ -102,7 +106,9 @@ export function SubmissionsManagementModal({
       toast.success('Submission rejected');
       loadSubmissions();
     } catch (error) {
-      console.error('Error rejecting:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error rejecting:', error);
+      }
       toast.error('Failed to reject submission');
     } finally {
       setActionLoading(null);

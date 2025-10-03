@@ -41,7 +41,9 @@ export function useUserSpending() {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching user spending:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error fetching user spending:', error);
+        }
       } else if (data) {
         setSpending(data as unknown as UserSpending);
       }
@@ -84,11 +86,15 @@ export function useUserSpending() {
       });
 
       if (error) {
-        console.error('Error adding spending:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error adding spending:', error);
+        }
         throw error;
       }
     } catch (err) {
-      console.error('Error calling add_user_spending:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error calling add_user_spending:', err);
+      }
       throw err;
     }
   };

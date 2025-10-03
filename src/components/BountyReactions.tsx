@@ -69,28 +69,39 @@ export function BountyReactions({ requestId }: BountyReactionsProps) {
 
     const isActive = type === 'like' ? liked : type === 'bookmark' ? bookmarked : watching;
 
-    if (isActive) {
-      await supabase
-        .from('bounty_reactions')
-        .delete()
-        .eq('request_id', requestId)
-        .eq('user_id', user.id)
-        .eq('reaction_type', type);
-    } else {
-      await supabase
-        .from('bounty_reactions')
-        .insert([{
-          request_id: requestId as any,
-          user_id: user.id,
-          reaction_type: type
-        }]);
+    try {
+      if (isActive) {
+        const { error } = await supabase
+          .from('bounty_reactions')
+          .delete()
+          .eq('request_id', requestId)
+          .eq('user_id', user.id)
+          .eq('reaction_type', type);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('bounty_reactions')
+          .insert([{
+            request_id: requestId as any,
+            user_id: user.id,
+            reaction_type: type
+          }]);
+
+        if (error) throw error;
+      }
+
+      loadReactions();
+      
+      if (type === 'like') setLiked(!isActive);
+      if (type === 'bookmark') setBookmarked(!isActive);
+      if (type === 'watching') setWatching(!isActive);
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Error toggling reaction:', error);
+      }
+      toast.error('Failed to update reaction. Please try again.');
     }
-
-    loadReactions();
-
-    if (type === 'like') setLiked(!isActive);
-    if (type === 'bookmark') setBookmarked(!isActive);
-    if (type === 'watching') setWatching(!isActive);
   };
 
   return (

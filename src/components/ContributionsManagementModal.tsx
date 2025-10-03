@@ -50,7 +50,9 @@ export function ContributionsManagementModal({
       if (error) throw error;
       setContributions((data || []) as Contribution[]);
     } catch (error) {
-      console.error('Error loading contributions:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error loading contributions:', error);
+      }
       toast({
         title: 'Failed to load contributions',
         description: error instanceof Error ? error.message : 'An error occurred',
@@ -77,7 +79,9 @@ export function ContributionsManagementModal({
 
       loadContributions();
     } catch (error) {
-      console.error('Error updating contribution:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error updating contribution:', error);
+      }
       toast({
         title: 'Failed to update contribution',
         description: error instanceof Error ? error.message : 'An error occurred',
