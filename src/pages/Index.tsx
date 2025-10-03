@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-export default function GlassSlipper() {
+export default function Glazn() {
   const { user, signOut, loading } = useAuth();
   const { spending, addSpending } = useUserSpending();
   const navigate = useNavigate();
@@ -380,7 +380,7 @@ export default function GlassSlipper() {
                 <Sparkles className="w-3 h-3 text-neon-yellow absolute -top-1 -right-1 animate-pulse" />
               </div>
               <h1 className="text-xl font-black bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-cyan bg-clip-text text-transparent">
-                GlassSlipper
+                Glazn
               </h1>
             </div>
             

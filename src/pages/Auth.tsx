@@ -59,7 +59,7 @@ export default function Auth() {
           {/* Title */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-black bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-cyan bg-clip-text text-transparent mb-2 animate-pulse">
-              Welcome to GlassSlipper
+              Welcome to Glazn
             </h1>
             <p className="text-muted-foreground">
               Enter the cosmic bounty marketplace
