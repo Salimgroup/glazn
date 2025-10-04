@@ -769,6 +769,10 @@ export type Database = {
       }
     }
     Functions: {
+      complete_payout_atomic: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: Json
+      }
       get_total_bounty: {
         Args: { request_id_param: string }
         Returns: number
@@ -779,6 +783,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      process_deposit_atomic: {
+        Args: {
+          p_net_amount: number
+          p_total_amount: number
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      process_payout_atomic: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {

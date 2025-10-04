@@ -31,16 +31,15 @@ serve(async (req) => {
       throw new Error("Invalid amount");
     }
 
-    // Check wallet balance
-    const { data: wallet } = await supabaseClient
-      .from("wallet_balances")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("currency", "USD")
-      .single();
+    // Use atomic function to check balance and move to pending (prevents race conditions)
+    const { data: walletResult, error: walletError } = await supabaseClient
+      .rpc("process_payout_atomic", {
+        p_user_id: user.id,
+        p_amount: amount,
+      });
 
-    if (!wallet || wallet.available_balance < amount) {
-      throw new Error("Insufficient balance");
+    if (walletError) {
+      throw new Error(walletError.message || "Failed to process payout");
     }
 
     // Check for connected Stripe account
@@ -83,14 +82,7 @@ serve(async (req) => {
       .select()
       .single();
 
-    // Update wallet (move to pending)
-    await supabaseClient
-      .from("wallet_balances")
-      .update({
-        available_balance: wallet.available_balance - amount,
-        pending_balance: wallet.pending_balance + amount,
-      })
-      .eq("id", wallet.id);
+    // Wallet already updated atomically above - no separate update needed
 
     // Create transfer to connected account
     const transfer = await stripe.transfers.create({
@@ -122,14 +114,11 @@ serve(async (req) => {
       description: `Withdrawal of $${netAmount} (after 20% fee)`,
     });
 
-    // Update wallet (remove from pending, update total withdrawn)
-    await supabaseClient
-      .from("wallet_balances")
-      .update({
-        pending_balance: wallet.pending_balance,
-        total_withdrawn: wallet.total_withdrawn + amount,
-      })
-      .eq("id", wallet.id);
+    // Complete payout atomically
+    await supabaseClient.rpc("complete_payout_atomic", {
+      p_user_id: user.id,
+      p_amount: amount,
+    });
 
     console.log("Payout completed for user:", user.id, "Net amount:", netAmount);
 
@@ -147,7 +136,8 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Payout error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

@@ -38,29 +38,16 @@ serve(async (req) => {
       const feeAmount = parseFloat(session.metadata.fee_amount);
       const netAmount = parseFloat(session.metadata.net_amount);
 
-      // Create or update wallet balance
-      const { data: wallet } = await supabaseClient
-        .from("wallet_balances")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("currency", "USD")
-        .single();
-
-      if (wallet) {
-        await supabaseClient
-          .from("wallet_balances")
-          .update({
-            available_balance: wallet.available_balance + netAmount,
-            total_deposited: wallet.total_deposited + netAmount,
-          })
-          .eq("id", wallet.id);
-      } else {
-        await supabaseClient.from("wallet_balances").insert({
-          user_id: user.id,
-          available_balance: netAmount,
-          total_deposited: netAmount,
-          currency: "USD",
+      // Use atomic function to update wallet (prevents race conditions)
+      const { error: walletError } = await supabaseClient
+        .rpc("process_deposit_atomic", {
+          p_user_id: user.id,
+          p_net_amount: netAmount,
+          p_total_amount: amount,
         });
+
+      if (walletError) {
+        throw new Error(`Failed to update wallet: ${walletError.message}`);
       }
 
       // Record transaction
@@ -90,7 +77,8 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Verify deposit error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
