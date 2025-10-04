@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
+import Community from "./pages/Community";
 import Auth from "./pages/Auth";
 import HowTo from "./pages/HowTo";
 import Wallet from "./pages/Wallet";
@@ -23,7 +24,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Community />} />
+            <Route path="/bounties" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/how-to" element={<HowTo />} />
             <Route path="/wallet" element={<Wallet />} />
