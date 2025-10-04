@@ -20,17 +20,34 @@ interface Submission {
 interface SubmissionsManagementModalProps {
   requestId: string;
   requestTitle: string;
+  requestOwnerId: string; // SECURITY: Verify user authorization
   onClose: () => void;
 }
 
 export function SubmissionsManagementModal({ 
   requestId, 
-  requestTitle, 
+  requestTitle,
+  requestOwnerId, 
   onClose 
 }: SubmissionsManagementModalProps) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // SECURITY: Verify current user is the request owner
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+      
+      if (user?.id !== requestOwnerId) {
+        toast.error('Unauthorized: You can only manage submissions for your own requests');
+        onClose();
+      }
+    };
+    getCurrentUser();
+  }, [requestOwnerId, onClose]);
 
   useEffect(() => {
     loadSubmissions();
@@ -57,6 +74,12 @@ export function SubmissionsManagementModal({
   };
 
   const handleApprove = async (submissionId: string) => {
+    // SECURITY: Double-check authorization before approval
+    if (currentUserId !== requestOwnerId) {
+      toast.error('Unauthorized: You can only approve submissions for your own requests');
+      return;
+    }
+
     setActionLoading(submissionId);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -85,6 +108,12 @@ export function SubmissionsManagementModal({
   };
 
   const handleReject = async (submissionId: string) => {
+    // SECURITY: Double-check authorization before rejection
+    if (currentUserId !== requestOwnerId) {
+      toast.error('Unauthorized: You can only reject submissions for your own requests');
+      return;
+    }
+
     const reason = prompt('Optional: Reason for rejection?');
     
     setActionLoading(submissionId);

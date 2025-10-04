@@ -146,7 +146,7 @@ export default function Glazn() {
   const [aiEnabled, setAiEnabled] = useState(true);
   const [autoSubmissions, setAutoSubmissions] = useState<any[]>([]);
   const [showExternalSubmission, setShowExternalSubmission] = useState<{ id: number; title: string } | null>(null);
-  const [showSubmissionsManagement, setShowSubmissionsManagement] = useState<{ id: number; title: string } | null>(null);
+  const [showSubmissionsManagement, setShowSubmissionsManagement] = useState<{ id: number; title: string; userId: string } | null>(null);
   const [shareableBounty, setShareableBounty] = useState<{ id: number; title: string } | null>(null);
   const [contributeToBounty, setContributeToBounty] = useState<{ id: number; title: string; bounty: number; minimumContribution?: number } | null>(null);
   const [manageContributions, setManageContributions] = useState<{ id: number; title: string } | null>(null);
@@ -772,7 +772,7 @@ export default function Glazn() {
                       {request.requester === 'You' && (
                           <>
                             <button
-                              onClick={() => setShowSubmissionsManagement({ id: request.id, title: request.title })}
+                              onClick={() => setShowSubmissionsManagement({ id: request.id, title: request.title, userId: user?.id || '' })}
                               className="flex-1 bg-card/60 hover:bg-card/80 text-foreground px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 border-2 border-neon-purple/40"
                             >
                               <FileCheck className="w-4 h-4" />
@@ -1224,6 +1224,7 @@ export default function Glazn() {
         <SubmissionsManagementModal
           requestId={showSubmissionsManagement.id.toString()}
           requestTitle={showSubmissionsManagement.title}
+          requestOwnerId={showSubmissionsManagement.userId}
           onClose={() => setShowSubmissionsManagement(null)}
         />
       )}

@@ -8,6 +8,8 @@ import { UserAvatar } from '@/components/UserAvatar';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { useIsOwnProfile } from '@/lib/dataPrivacy';
 
 interface Profile {
   id: string;
@@ -32,9 +34,13 @@ interface UserStatus {
 
 export default function PublicProfile() {
   const { username } = useParams<{ username: string }>();
+  const { user: currentUser } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userStatus, setUserStatus] = useState<UserStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Check if viewing own profile for data privacy
+  const isOwnProfile = useIsOwnProfile(profile?.id);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -174,14 +180,26 @@ export default function PublicProfile() {
               </div>
             </div>
             
-            <div className="text-center">
-              <div className="text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-1">
-                {userStatus?.creator_points || 0}
+            {/* SECURITY: Only show points to profile owner */}
+            {isOwnProfile ? (
+              <div className="text-center">
+                <div className="text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-1">
+                  {userStatus?.creator_points || 0}
+                </div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Glazn Points
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider">
-                Glazn Points
+            ) : (
+              <div className="text-center">
+                <div className="text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-1">
+                  {userStatus?.creator_tier ? userStatus.creator_tier.replace('glass_', '').replace('_', ' ') : 'N/A'}
+                </div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Creator Tier
+                </div>
               </div>
-            </div>
+            )}
             
             <div className="text-center">
               <div className="text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-1">

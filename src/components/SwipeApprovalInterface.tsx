@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, X, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Submission {
   id: number;
@@ -17,6 +18,7 @@ interface Submission {
 interface SwipeApprovalInterfaceProps {
   submissions: Submission[];
   bountyAmount: number;
+  requestOwnerId: string; // SECURITY: Verify user authorization
   onApprove: (submissionId: number) => Promise<void>;
   onReject: (submissionId: number, reason?: string) => Promise<void>;
   onClose: () => void;
@@ -25,6 +27,7 @@ interface SwipeApprovalInterfaceProps {
 export function SwipeApprovalInterface({
   submissions,
   bountyAmount,
+  requestOwnerId,
   onApprove,
   onReject,
   onClose
@@ -32,11 +35,32 @@ export function SwipeApprovalInterface({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const currentSubmission = submissions[currentIndex];
 
+  // SECURITY: Verify current user is the request owner
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+      
+      if (user?.id !== requestOwnerId) {
+        toast.error('Unauthorized: You can only manage submissions for your own requests');
+        onClose();
+      }
+    };
+    getCurrentUser();
+  }, [requestOwnerId, onClose]);
+
   const handleSwipe = async (direction: 'approve' | 'reject') => {
     if (isProcessing || !currentSubmission) return;
+
+    // SECURITY: Double-check authorization before any action
+    if (currentUserId !== requestOwnerId) {
+      toast.error('Unauthorized: You can only manage submissions for your own requests');
+      return;
+    }
 
     setIsProcessing(true);
     setSwipeDirection(direction === 'approve' ? 'right' : 'left');
