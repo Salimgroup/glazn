@@ -73,11 +73,11 @@ export function ContributorsList({
 
       if (contributionsError) throw contributionsError;
 
-      // Fetch profiles for contributors
+      // Fetch profiles for contributors using secure public_profiles view
       if (contributionsData && contributionsData.length > 0) {
         const contributorIds = contributionsData.map((c) => c.contributor_id);
         const { data: profilesData } = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('id, display_name, username, avatar_url')
           .in('id', contributorIds);
 
