@@ -11,16 +11,16 @@ import {
 import { toast } from 'sonner';
 
 interface ShareableBountyLinkProps {
-  bountyId: number;
+  bountyId: number | string;
   bountyTitle: string;
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
 }
 
 export const ShareableBountyLink: React.FC<ShareableBountyLinkProps> = ({
   bountyId,
   bountyTitle,
-  isOpen,
+  isOpen = true,
   onClose
 }) => {
   const [copied, setCopied] = useState(false);

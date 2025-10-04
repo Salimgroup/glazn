@@ -404,6 +404,13 @@ export default function Glazn() {
             <div className="flex items-center gap-2">
               <NotificationBell />
               <button
+                onClick={() => navigate('/feed')}
+                className="bg-gradient-neon text-white px-4 py-2 rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-2"
+              >
+                <Zap className="w-4 h-4" />
+                FEED
+              </button>
+              <button
                 onClick={() => navigate('/')}
                 className="bg-card/60 hover:bg-card/80 text-foreground px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 border-2 border-neon-purple/40"
               >

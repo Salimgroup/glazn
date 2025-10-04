@@ -13,6 +13,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
+import BountyFeed from "./pages/BountyFeed";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Community />} />
             <Route path="/bounties" element={<Index />} />
+            <Route path="/feed" element={<BountyFeed />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/how-to" element={<HowTo />} />
             <Route path="/wallet" element={<Wallet />} />

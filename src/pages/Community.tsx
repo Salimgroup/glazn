@@ -368,18 +368,25 @@ export default function Community() {
             <div className="flex items-center gap-2">
               <NotificationBell />
               <button
+                onClick={() => navigate('/feed')}
+                className="bg-gradient-neon text-white px-4 py-2 rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                FEED
+              </button>
+              <button
+                onClick={() => navigate('/bounties')}
+                className="bg-card/60 hover:bg-card/80 text-foreground px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 border-2 border-neon-purple/40"
+              >
+                <Globe className="w-4 h-4" />
+                BOUNTIES
+              </button>
+              <button
                 onClick={() => navigate('/how-to')}
                 className="bg-card/60 hover:bg-card/80 text-foreground px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 border-2 border-neon-cyan/40"
               >
                 <HelpCircle className="w-4 h-4" />
                 HOW TO
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="bg-gradient-neon text-white px-6 py-2 rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-2"
-              >
-                <Crown className="w-4 h-4" />
-                BROWSE BOUNTIES
               </button>
               <Button
                 onClick={async () => {
