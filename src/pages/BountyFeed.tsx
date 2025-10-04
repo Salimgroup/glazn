@@ -126,27 +126,10 @@ export default function BountyFeed() {
   return (
     <div className="relative h-screen w-full overflow-hidden bg-gradient-space">
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/60 to-transparent p-4">
-        <div className="flex items-center justify-between">
-          <Button
-            onClick={() => navigate('/bounties')}
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </Button>
-          <div className="text-white font-bold text-lg">Bounty Feed</div>
-          <Button
-            onClick={() => setShowFilters(true)}
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20"
-          >
-            <Filter className="w-6 h-6" />
-          </Button>
-        </div>
-      </div>
+      <FeedHeader 
+        onBack={() => navigate('/bounties')} 
+        onFilter={() => setShowFilters(true)}
+      />
 
       {/* Bounty Card Container */}
       <div
@@ -363,33 +346,45 @@ export default function BountyFeed() {
   );
 }
 
-function BountyUserHeader({ bounty }: { bounty: Bounty }) {
-  const { status } = useUserStatus(bounty.user_id || undefined);
+function FeedHeader({ onBack, onFilter }: { onBack: () => void; onFilter: () => void }) {
+  const { status } = useUserStatus();
   
   return (
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-neon" />
-        <div>
-          <div className="flex items-center gap-2">
-            <p className="font-semibold text-foreground">
-              {bounty.is_anonymous ? 'Anonymous' : 'Requester'}
-            </p>
-            {status && (
+    <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/60 to-transparent p-4">
+      <div className="flex items-center justify-between">
+        <Button
+          onClick={onBack}
+          variant="ghost"
+          size="icon"
+          className="text-white hover:bg-white/20"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </Button>
+        
+        <div className="flex items-center gap-3">
+          <div className="text-white font-bold text-lg">Bounty Feed</div>
+          {status && (
+            <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full">
               <StatusBadge 
-                tier={status.requester_tier as any} 
-                title={status.requester_tier}
+                tier={status.creator_tier as any} 
+                title="Creator"
                 showTitle={false}
               />
-            )}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Crown className="w-3 h-3" />
-            <span>{status?.requester_points.toLocaleString() || 0} pts</span>
-            <span>•</span>
-            <span>{status?.bounties_paid || 0} bounties</span>
-          </div>
+              <span className="text-sm font-bold text-white">
+                {status.creator_points.toLocaleString()}
+              </span>
+            </div>
+          )}
         </div>
+        
+        <Button
+          onClick={onFilter}
+          variant="ghost"
+          size="icon"
+          className="text-white hover:bg-white/20"
+        >
+          <Filter className="w-6 h-6" />
+        </Button>
       </div>
     </div>
   );

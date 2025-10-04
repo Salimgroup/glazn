@@ -1,43 +1,93 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Trophy, Crown, Star, Medal, TrendingUp } from 'lucide-react';
+import { Trophy, Crown, Star, Medal, TrendingUp, Sparkles, Wallet, CheckCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { StatusBadge } from './StatusBadge';
 
-interface PublicProfile {
+interface LeaderboardEntry {
   id: string;
+  user_id: string;
   username: string;
-  display_name: string;
+  display_name: string | null;
   verified: boolean;
-  reputation_score: number;
-  bounties_completed: number;
-  bounties_posted: number;
+  creator_points?: number;
+  bounties_completed?: number;
+  creator_tier?: string;
+  requester_points?: number;
+  bounties_paid?: number;
+  requester_tier?: string;
 }
 
 export function LeaderboardPanel() {
-  const [topCreators, setTopCreators] = useState<PublicProfile[]>([]);
-  const [topRequesters, setTopRequesters] = useState<PublicProfile[]>([]);
+  const [topCreators, setTopCreators] = useState<LeaderboardEntry[]>([]);
+  const [topRequesters, setTopRequesters] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
     loadLeaderboards();
   }, []);
 
   const loadLeaderboards = async () => {
-    // Query profiles table directly - RLS policies automatically exclude sensitive financial data
-    // Sort by reputation score for privacy
-    const { data: creators } = await supabase
-      .from('profiles')
-      .select('id, username, display_name, avatar_url, bio, portfolio_url, verified, reputation_score, bounties_completed, bounties_posted, success_rate, created_at, updated_at')
-      .order('reputation_score', { ascending: false })
-      .limit(10);
+    try {
+      // Fetch top creators with user_status
+      const { data: creators, error: creatorsError } = await supabase
+        .from('user_status')
+        .select(`
+          id,
+          user_id,
+          creator_points,
+          bounties_completed,
+          creator_tier,
+          profiles!inner(username, display_name, verified)
+        `)
+        .order('creator_points', { ascending: false })
+        .limit(10);
 
-    const { data: requesters } = await supabase
-      .from('profiles')
-      .select('id, username, display_name, avatar_url, bio, portfolio_url, verified, reputation_score, bounties_completed, bounties_posted, success_rate, created_at, updated_at')
-      .order('reputation_score', { ascending: false })
-      .limit(10);
+      if (creatorsError) throw creatorsError;
+      
+      const formattedCreators = creators?.map((c: any) => ({
+        id: c.id,
+        user_id: c.user_id,
+        username: c.profiles?.username,
+        display_name: c.profiles?.display_name,
+        verified: c.profiles?.verified,
+        creator_points: c.creator_points,
+        bounties_completed: c.bounties_completed,
+        creator_tier: c.creator_tier,
+      })) || [];
+      
+      setTopCreators(formattedCreators);
 
-    if (creators) setTopCreators(creators as PublicProfile[]);
-    if (requesters) setTopRequesters(requesters as PublicProfile[]);
+      // Fetch top requesters with user_status
+      const { data: requesters, error: requestersError } = await supabase
+        .from('user_status')
+        .select(`
+          id,
+          user_id,
+          requester_points,
+          bounties_paid,
+          requester_tier,
+          profiles!inner(username, display_name, verified)
+        `)
+        .order('requester_points', { ascending: false })
+        .limit(10);
+
+      if (requestersError) throw requestersError;
+      
+      const formattedRequesters = requesters?.map((r: any) => ({
+        id: r.id,
+        user_id: r.user_id,
+        username: r.profiles?.username,
+        display_name: r.profiles?.display_name,
+        verified: r.profiles?.verified,
+        requester_points: r.requester_points,
+        bounties_paid: r.bounties_paid,
+        requester_tier: r.requester_tier,
+      })) || [];
+      
+      setTopRequesters(formattedRequesters);
+    } catch (error) {
+      console.error('Error loading leaderboards:', error);
+    }
   };
 
   const getRankIcon = (index: number) => {
@@ -47,11 +97,11 @@ export function LeaderboardPanel() {
     return <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>;
   };
 
-  const LeaderList = ({ profiles, type }: { profiles: PublicProfile[]; type: 'creator' | 'requester' }) => (
+  const LeaderList = ({ users, type }: { users: LeaderboardEntry[]; type: 'creators' | 'requesters' }) => (
     <div className="space-y-2">
-      {profiles.map((profile, index) => (
+      {users.map((entry, index) => (
         <div
-          key={profile.id}
+          key={entry.id}
           className="flex items-center gap-3 p-3 bg-gradient-space/30 rounded-xl border border-neon-purple/20 hover:border-neon-cyan/40 transition-all"
         >
           <div className="w-8 flex items-center justify-center">
@@ -60,23 +110,51 @@ export function LeaderboardPanel() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <p className="font-bold text-foreground truncate">
-                {profile.display_name || profile.username}
+                {entry.display_name || entry.username}
               </p>
-              {profile.verified && (
-                <Star className="w-4 h-4 text-neon-yellow fill-neon-yellow" />
+              {entry.verified && (
+                <CheckCircle className="w-4 h-4 text-neon-cyan" />
+              )}
+              {type === 'creators' && entry.creator_tier && (
+                <StatusBadge 
+                  tier={entry.creator_tier as any} 
+                  title="Creator"
+                  showTitle={false}
+                />
+              )}
+              {type === 'requesters' && entry.requester_tier && (
+                <StatusBadge 
+                  tier={entry.requester_tier as any} 
+                  title="Requester"
+                  showTitle={false}
+                />
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {type === 'creator'
-                ? `${profile.bounties_completed} completed`
-                : `${profile.bounties_posted} bounties posted`}
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-lg font-black bg-gradient-neon bg-clip-text text-transparent">
-              {profile.reputation_score}
+            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+              {type === 'creators' ? (
+                <>
+                  <span className="flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    {entry.creator_points?.toLocaleString()} glazn pts
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    {entry.bounties_completed} completed
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    {entry.requester_points?.toLocaleString()} glazn pts
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Wallet className="w-3 h-3" />
+                    {entry.bounties_paid} paid
+                  </span>
+                </>
+              )}
             </div>
-            <div className="text-xs text-muted-foreground">reputation</div>
           </div>
         </div>
       ))}
@@ -108,11 +186,11 @@ export function LeaderboardPanel() {
         </TabsList>
 
         <TabsContent value="creators" className="max-h-[400px] overflow-y-auto">
-          <LeaderList profiles={topCreators} type="creator" />
+          <LeaderList users={topCreators} type="creators" />
         </TabsContent>
 
         <TabsContent value="requesters" className="max-h-[400px] overflow-y-auto">
-          <LeaderList profiles={topRequesters} type="requester" />
+          <LeaderList users={topRequesters} type="requesters" />
         </TabsContent>
       </Tabs>
     </div>
