@@ -455,50 +455,51 @@ export default function Glazn() {
 
       {/* Compact Header */}
       <header className="bg-card/40 backdrop-blur-xl border-b border-neon-pink/30 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <UserAvatar ethnicity="mixed" size="md" />
               <div className="relative">
-                <div className="bg-gradient-neon p-2 rounded-xl shadow-neon">
-                  <Crown className="w-6 h-6 text-white" />
+                <div className="bg-gradient-neon p-1.5 sm:p-2 rounded-xl shadow-neon">
+                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <Sparkles className="w-3 h-3 text-neon-yellow absolute -top-1 -right-1 animate-pulse" />
               </div>
-              <h1 className="text-xl font-black bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-cyan bg-clip-text text-transparent">
+              <h1 className="text-lg sm:text-xl font-black bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-cyan bg-clip-text text-transparent">
                 Glazn
               </h1>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <NotificationBell />
               <button
                 onClick={() => navigate('/feed')}
-                className="bg-gradient-neon text-white px-4 py-2 rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-2"
+                className="bg-gradient-neon text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
               >
-                <Zap className="w-4 h-4" />
-                FEED
+                <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">FEED</span>
               </button>
               <button
                 onClick={() => navigate('/')}
-                className="bg-card/60 hover:bg-card/80 text-foreground px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 border-2 border-neon-purple/40"
+                className="hidden md:flex bg-card/60 hover:bg-card/80 text-foreground px-4 py-2 rounded-xl font-bold transition-all items-center gap-2 border-2 border-neon-purple/40"
               >
                 <Users className="w-4 h-4" />
                 COMMUNITY
               </button>
               <button
                 onClick={() => navigate('/how-to')}
-                className="bg-card/60 hover:bg-card/80 text-foreground px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 border-2 border-neon-cyan/40"
+                className="bg-card/60 hover:bg-card/80 text-foreground px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold transition-all flex items-center gap-1 border-2 border-neon-cyan/40 text-xs sm:text-sm"
               >
-                <HelpCircle className="w-4 h-4" />
-                HOW TO
+                <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">HOW TO</span>
               </button>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-neon text-white px-6 py-2 rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-2"
+                className="bg-gradient-neon text-white px-2 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
               >
-                <Crown className="w-4 h-4" />
-                POST BOUNTY
+                <Crown className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">POST</span>
+                <span className="hidden sm:inline"> BOUNTY</span>
               </button>
               <Button
                 onClick={async () => {
@@ -508,9 +509,9 @@ export default function Glazn() {
                 }}
                 variant="outline"
                 size="icon"
-                className="border-neon-cyan/40 hover:bg-neon-cyan/10 hover:shadow-cyan"
+                className="border-neon-cyan/40 hover:bg-neon-cyan/10 hover:shadow-cyan w-8 h-8 sm:w-10 sm:h-10"
               >
-                <LogOut className="w-4 h-4 text-neon-cyan" />
+                <LogOut className="w-3 h-3 sm:w-4 sm:h-4 text-neon-cyan" />
               </Button>
             </div>
           </div>
@@ -518,85 +519,85 @@ export default function Glazn() {
       </header>
 
       {/* Hero Stats Bar */}
-      <div className="bg-gradient-cyber py-4 shadow-neon border-b border-neon-cyan/30">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-card/40 backdrop-blur-sm rounded-xl p-3 border-2 border-neon-pink/40">
-              <div className="text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-1">
+      <div className="bg-gradient-cyber py-3 sm:py-4 shadow-neon border-b border-neon-cyan/30">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+            <div className="bg-card/40 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-neon-pink/40">
+              <div className="text-lg sm:text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-0.5 sm:mb-1">
                 ${requests.reduce((sum, r) => sum + r.bounty, 0).toLocaleString()}
               </div>
-              <div className="text-xs font-bold text-neon-yellow uppercase tracking-wider">Total Bounties</div>
+              <div className="text-[0.6rem] sm:text-xs font-bold text-neon-yellow uppercase tracking-wider">Total Bounties</div>
             </div>
-            <div className="bg-card/40 backdrop-blur-sm rounded-xl p-3 border-2 border-neon-purple/40">
-              <div className="text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-1">
+            <div className="bg-card/40 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-neon-purple/40">
+              <div className="text-lg sm:text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-0.5 sm:mb-1">
                 {filteredRequests.length}
               </div>
-              <div className="text-xs font-bold text-neon-cyan uppercase tracking-wider">Active Requests</div>
+              <div className="text-[0.6rem] sm:text-xs font-bold text-neon-cyan uppercase tracking-wider">Active</div>
             </div>
-            <div className="bg-card/40 backdrop-blur-sm rounded-xl p-3 border-2 border-neon-cyan/40">
-              <div className="text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-1">
+            <div className="bg-card/40 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-neon-cyan/40">
+              <div className="text-lg sm:text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-0.5 sm:mb-1">
                 {portfolio.reduce((sum, p) => sum + p.timesUsed, 0)}
               </div>
-              <div className="text-xs font-bold text-neon-pink uppercase tracking-wider">AI Matches</div>
+              <div className="text-[0.6rem] sm:text-xs font-bold text-neon-pink uppercase tracking-wider">Matches</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
         {/* Simplified Tabs */}
-        <div className="flex gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3 mb-4 sm:mb-6">
           <button
             onClick={() => setActiveTab('browse')}
-            className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
+            className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 font-bold rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm ${
               activeTab === 'browse'
                 ? 'bg-gradient-neon text-white shadow-neon border-2 border-neon-pink'
                 : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
             }`}
           >
-            <div className="flex items-center justify-center gap-2">
-              <Target className="w-5 h-5" />
-              BOUNTIES ({filteredRequests.length})
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-[0.65rem] sm:text-sm">BOUNTIES ({filteredRequests.length})</span>
             </div>
           </button>
           <button
             onClick={() => setActiveTab('influencers')}
-            className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
+            className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 font-bold rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm ${
               activeTab === 'influencers'
                 ? 'bg-gradient-to-r from-neon-yellow to-neon-cyan text-space-dark shadow-cyan border-2 border-neon-cyan'
                 : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
             }`}
           >
-            <div className="flex items-center justify-center gap-2">
-              <Crown className="w-5 h-5" />
-              INFLUENCERS
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+              <Crown className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-[0.65rem] sm:text-sm">INFLUENCERS</span>
             </div>
           </button>
           <button
             onClick={() => setActiveTab('creator')}
-            className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
+            className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 font-bold rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm ${
               activeTab === 'creator'
                 ? 'bg-gradient-to-r from-neon-cyan to-neon-purple text-white shadow-cyan border-2 border-neon-cyan'
                 : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
             }`}
           >
-            <div className="flex items-center justify-center gap-2">
-              <Star className="w-5 h-5" />
-              MY REQUESTS
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+              <Star className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-[0.65rem] sm:text-sm">REQUESTS</span>
             </div>
           </button>
           <button
             onClick={() => setActiveTab('portfolio')}
-            className={`flex-1 py-3 px-4 font-bold rounded-xl transition-all ${
+            className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 font-bold rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm ${
               activeTab === 'portfolio'
                 ? 'bg-gradient-to-r from-neon-purple to-neon-pink text-white shadow-glow border-2 border-neon-purple'
                 : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
             }`}
           >
-            <div className="flex items-center justify-center gap-2">
-              <Sparkles className="w-5 h-5" />
-              MY CONTENT ({portfolio.filter(p => p.autoSubmit).length})
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-[0.65rem] sm:text-sm">CONTENT ({portfolio.filter(p => p.autoSubmit).length})</span>
             </div>
           </button>
         </div>
@@ -605,7 +606,7 @@ export default function Glazn() {
         {activeTab === 'browse' && (
           <>
             {/* Quick Stats Dashboard */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
               <QuickStatsCard
                 title="Active Bounties"
                 value={filteredRequests.length}
@@ -736,15 +737,15 @@ export default function Glazn() {
 
         {/* Bounty Cards with Sidebar Layout */}
         {activeTab === 'browse' && (
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Left Sidebar - Trending & Activity */}
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-1 space-y-4 sm:space-y-6 order-last lg:order-first">
               <TrendingBountiesSection />
               <LiveActivityFeed />
             </div>
 
             {/* Main Content - Bounty Cards */}
-            <div className="lg:col-span-1 space-y-4">
+            <div className="lg:col-span-1 space-y-3 sm:space-y-4">
               {filteredRequests.map((request) => {
                 const matchedItems = getMatchedPortfolioItems(request);
                 const bestMatch = matchedItems[0];
