@@ -343,13 +343,14 @@ export type Database = {
           featured: boolean | null
           id: string
           is_anonymous: boolean | null
+          is_system_generated: boolean | null
           minimum_contribution: number | null
           platform: string | null
           status: string | null
           title: string
           trending_score: number | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
           view_count: number | null
         }
         Insert: {
@@ -363,13 +364,14 @@ export type Database = {
           featured?: boolean | null
           id?: string
           is_anonymous?: boolean | null
+          is_system_generated?: boolean | null
           minimum_contribution?: number | null
           platform?: string | null
           status?: string | null
           title: string
           trending_score?: number | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
           view_count?: number | null
         }
         Update: {
@@ -383,13 +385,14 @@ export type Database = {
           featured?: boolean | null
           id?: string
           is_anonymous?: boolean | null
+          is_system_generated?: boolean | null
           minimum_contribution?: number | null
           platform?: string | null
           status?: string | null
           title?: string
           trending_score?: number | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
           view_count?: number | null
         }
         Relationships: []
