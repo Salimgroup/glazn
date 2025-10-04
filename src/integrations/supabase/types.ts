@@ -687,47 +687,11 @@ export type Database = {
         }
         Relationships: []
       }
-      public_profiles: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          bounties_completed: number | null
-          bounties_posted: number | null
-          created_at: string | null
-          display_name: string | null
-          id: string | null
-          portfolio_url: string | null
-          reputation_score: number | null
-          success_rate: number | null
-          updated_at: string | null
-          username: string | null
-          verified: boolean | null
-        }
-        Relationships: []
-      }
     }
     Functions: {
       complete_payout_atomic: {
         Args: { p_amount: number; p_user_id: string }
         Returns: Json
-      }
-      get_public_profiles: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          avatar_url: string
-          bio: string
-          bounties_completed: number
-          bounties_posted: number
-          created_at: string
-          display_name: string
-          id: string
-          portfolio_url: string
-          reputation_score: number
-          success_rate: number
-          updated_at: string
-          username: string
-          verified: boolean
-        }[]
       }
       get_total_bounty: {
         Args: { request_id_param: string }

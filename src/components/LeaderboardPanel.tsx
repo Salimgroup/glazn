@@ -22,17 +22,17 @@ export function LeaderboardPanel() {
   }, []);
 
   const loadLeaderboards = async () => {
-    // Use public_profiles view that excludes sensitive financial data
-    // Sort by reputation score instead of financial data for privacy
+    // Query profiles table directly - RLS policies automatically exclude sensitive financial data
+    // Sort by reputation score for privacy
     const { data: creators } = await supabase
-      .from('public_profiles')
-      .select('*')
+      .from('profiles')
+      .select('id, username, display_name, avatar_url, bio, portfolio_url, verified, reputation_score, bounties_completed, bounties_posted, success_rate, created_at, updated_at')
       .order('reputation_score', { ascending: false })
       .limit(10);
 
     const { data: requesters } = await supabase
-      .from('public_profiles')
-      .select('*')
+      .from('profiles')
+      .select('id, username, display_name, avatar_url, bio, portfolio_url, verified, reputation_score, bounties_completed, bounties_posted, success_rate, created_at, updated_at')
       .order('reputation_score', { ascending: false })
       .limit(10);
 
