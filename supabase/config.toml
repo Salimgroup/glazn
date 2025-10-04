@@ -1,1 +1,4 @@
 project_id = "edbuedrjojnvfquakkfv"
+
+[functions.create-bounty-with-payment]
+verify_jwt = true

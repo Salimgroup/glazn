@@ -41,13 +41,25 @@ export function useUserStatus(userId?: string) {
     const fetchStatus = async () => {
       // Use full user_status table for own status (includes sensitive data)
       // Use public_user_status view for others (excludes points and financial data)
-      const tableName = isOwnStatus ? 'user_status' : 'public_user_status';
+      let data, error;
       
-      const { data, error } = await supabase
-        .from(tableName)
-        .select('*')
-        .eq('user_id', targetUserId)
-        .maybeSingle();
+      if (isOwnStatus) {
+        const result = await supabase
+          .from('user_status')
+          .select('*')
+          .eq('user_id', targetUserId)
+          .maybeSingle();
+        data = result.data;
+        error = result.error;
+      } else {
+        const result = await supabase
+          .from('public_user_status')
+          .select('*')
+          .eq('user_id', targetUserId)
+          .maybeSingle();
+        data = result.data;
+        error = result.error;
+      }
 
       if (error && error.code !== 'PGRST116') {
         if (import.meta.env.DEV) {
