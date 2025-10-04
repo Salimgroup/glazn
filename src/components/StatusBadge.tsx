@@ -105,7 +105,7 @@ export function StatusProgress({
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">Progress to {threshold.next}</span>
         <span className="font-medium text-foreground">
-          ${currentSpending.toFixed(0)} / ${threshold.max}
+          {currentSpending.toLocaleString()} / {threshold.max.toLocaleString()} pts
         </span>
       </div>
       <div className="relative h-3 bg-muted rounded-full overflow-hidden">
@@ -116,7 +116,7 @@ export function StatusProgress({
       </div>
       {remaining > 0 && (
         <p className="text-xs text-muted-foreground">
-          ${remaining.toFixed(0)} more to reach {threshold.next}
+          {remaining.toLocaleString()} points to reach {threshold.next}
         </p>
       )}
     </div>

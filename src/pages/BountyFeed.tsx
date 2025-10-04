@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Filter, X, DollarSign, Clock, User, Heart, Share2, Bookmark, MessageCircle } from 'lucide-react';
+import { ChevronLeft, Filter, X, DollarSign, Clock, User, Heart, Share2, Bookmark, MessageCircle, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { BountyReactions } from '@/components/BountyReactions';
 import { ShareableBountyLink } from '@/components/ShareableBountyLink';
 import { ExternalSubmissionModal } from '@/components/ExternalSubmissionModal';
+import { useUserStatus } from '@/hooks/useUserStatus';
 import { toast } from 'sonner';
 
 interface Bounty {
@@ -358,6 +359,38 @@ export default function BountyFeed() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+function BountyUserHeader({ bounty }: { bounty: Bounty }) {
+  const { status } = useUserStatus(bounty.user_id || undefined);
+  
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-gradient-neon" />
+        <div>
+          <div className="flex items-center gap-2">
+            <p className="font-semibold text-foreground">
+              {bounty.is_anonymous ? 'Anonymous' : 'Requester'}
+            </p>
+            {status && (
+              <StatusBadge 
+                tier={status.requester_tier as any} 
+                title={status.requester_tier}
+                showTitle={false}
+              />
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Crown className="w-3 h-3" />
+            <span>{status?.requester_points.toLocaleString() || 0} pts</span>
+            <span>•</span>
+            <span>{status?.bounties_paid || 0} bounties</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

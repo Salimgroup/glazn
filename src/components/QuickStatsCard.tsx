@@ -1,10 +1,10 @@
-import { TrendingUp, DollarSign, Target, Award, Eye } from 'lucide-react';
+import { TrendingUp, DollarSign, Target, Award, Eye, Sparkles } from 'lucide-react';
 
 interface StatsCardProps {
   title: string;
   value: string | number;
   change?: string;
-  icon: 'trending' | 'dollar' | 'target' | 'award' | 'eye';
+  icon: 'trending' | 'dollar' | 'target' | 'award' | 'eye' | 'sparkles';
   trend?: 'up' | 'down' | 'neutral';
 }
 
@@ -22,6 +22,8 @@ export function QuickStatsCard({ title, value, change, icon, trend = 'neutral' }
         return <Award className={iconClass} />;
       case 'eye':
         return <Eye className={iconClass} />;
+      case 'sparkles':
+        return <Sparkles className={iconClass} />;
     }
   };
 
