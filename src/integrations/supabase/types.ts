@@ -50,6 +50,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "activity_feed_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       bounty_contributions: {
@@ -144,6 +151,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bounty_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       follows: {
@@ -174,10 +188,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "follows_following_id_fkey"
             columns: ["following_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -219,6 +247,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -726,6 +761,57 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
           view_count: number | null
+        }
+        Relationships: []
+      }
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          bounties_completed: number | null
+          bounties_posted: number | null
+          created_at: string | null
+          creator_platforms: string[] | null
+          display_name: string | null
+          id: string | null
+          is_content_creator: boolean | null
+          portfolio_url: string | null
+          reputation_score: number | null
+          success_rate: number | null
+          username: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          bounties_completed?: number | null
+          bounties_posted?: number | null
+          created_at?: string | null
+          creator_platforms?: string[] | null
+          display_name?: string | null
+          id?: string | null
+          is_content_creator?: boolean | null
+          portfolio_url?: string | null
+          reputation_score?: number | null
+          success_rate?: number | null
+          username?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          bounties_completed?: number | null
+          bounties_posted?: number | null
+          created_at?: string | null
+          creator_platforms?: string[] | null
+          display_name?: string | null
+          id?: string | null
+          is_content_creator?: boolean | null
+          portfolio_url?: string | null
+          reputation_score?: number | null
+          success_rate?: number | null
+          username?: string | null
+          verified?: boolean | null
         }
         Relationships: []
       }
