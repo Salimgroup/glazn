@@ -22,8 +22,12 @@ interface Profile {
   creator_platforms: string[];
   portfolio_url: string;
   bounties_completed: number;
-  total_earnings: number;
+  total_earnings?: number; // Optional - only available for own profile
+  total_spent?: number; // Optional - only available for own profile
   reputation_score: number;
+  bounties_posted?: number;
+  success_rate?: number;
+  created_at?: string;
 }
 
 interface UserStatus {
@@ -50,21 +54,39 @@ export default function PublicProfile() {
         // Remove @ from username if present
         const cleanUsername = username.replace('@', '');
 
-        // Fetch profile
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
+        // First, try to get from public_profiles view (non-sensitive data)
+        const { data: publicProfileData, error: publicProfileError } = await supabase
+          .from('public_profiles')
           .select('*')
           .eq('username', cleanUsername)
           .single();
 
-        if (profileError) throw profileError;
-        setProfile(profileData);
+        if (publicProfileError) throw publicProfileError;
 
-        // Fetch user status
+        // Check if viewing own profile to fetch sensitive data
+        if (currentUser?.id === publicProfileData.id) {
+          // Fetch full profile with sensitive data for own profile
+          const { data: fullProfileData, error: fullProfileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', publicProfileData.id)
+            .single();
+
+          if (!fullProfileError && fullProfileData) {
+            setProfile(fullProfileData);
+          } else {
+            setProfile(publicProfileData);
+          }
+        } else {
+          // Use public profile data for other users
+          setProfile(publicProfileData);
+        }
+
+        // Fetch user status (will be filtered by dataPrivacy.ts on render)
         const { data: statusData } = await supabase
           .from('user_status')
           .select('creator_points, creator_tier, bounties_completed')
-          .eq('user_id', profileData.id)
+          .eq('user_id', publicProfileData.id)
           .single();
 
         if (statusData) {
@@ -79,7 +101,7 @@ export default function PublicProfile() {
     };
 
     fetchProfile();
-  }, [username]);
+  }, [username, currentUser]);
 
   if (loading) {
     return (
