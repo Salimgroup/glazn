@@ -50,13 +50,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "activity_feed_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       bounty_contributions: {
@@ -151,13 +144,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "bounty_reactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       follows: {
@@ -188,24 +174,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "follows_follower_id_fkey"
-            columns: ["follower_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "follows_following_id_fkey"
             columns: ["following_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "follows_following_id_fkey"
-            columns: ["following_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -247,13 +219,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -735,36 +700,6 @@ export type Database = {
           username: string | null
           verified: boolean | null
         }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          bounties_completed?: number | null
-          bounties_posted?: number | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-          portfolio_url?: string | null
-          reputation_score?: number | null
-          success_rate?: number | null
-          updated_at?: string | null
-          username?: string | null
-          verified?: boolean | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          bounties_completed?: number | null
-          bounties_posted?: number | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-          portfolio_url?: string | null
-          reputation_score?: number | null
-          success_rate?: number | null
-          updated_at?: string | null
-          username?: string | null
-          verified?: boolean | null
-        }
         Relationships: []
       }
     }
@@ -772,6 +707,24 @@ export type Database = {
       complete_payout_atomic: {
         Args: { p_amount: number; p_user_id: string }
         Returns: Json
+      }
+      get_public_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avatar_url: string
+          bio: string
+          bounties_completed: number
+          bounties_posted: number
+          created_at: string
+          display_name: string
+          id: string
+          portfolio_url: string
+          reputation_score: number
+          success_rate: number
+          updated_at: string
+          username: string
+          verified: boolean
+        }[]
       }
       get_total_bounty: {
         Args: { request_id_param: string }
