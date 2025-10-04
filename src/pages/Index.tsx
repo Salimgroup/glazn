@@ -324,33 +324,63 @@ export default function Glazn() {
   const handleCreateRequest = async () => {
     if (newRequest.title && newRequest.description && newRequest.bounty) {
       const bountyAmount = parseInt(newRequest.bounty);
-      const request = {
-        id: requests.length + 1,
-        title: newRequest.title,
-        description: newRequest.description,
-        bounty: bountyAmount,
-        requester: 'You',
-        category: newRequest.category,
-        deadline: `${newRequest.deadline} days`,
-        submissions: 0,
-        status: 'open',
-        aiMatched: [],
-        createdAt: Date.now()
-      };
-      setRequests([request, ...requests]);
-      setShowCreateModal(false);
-      setNewRequest({ title: '', description: '', bounty: '', category: 'Photography', deadline: '3', allowContributions: true, minimumContribution: '0' });
       
-      // Add spending and update points
       try {
-        await addSpending(bountyAmount);
-        toast.success(`✨ Request posted! +${bountyAmount} points earned!`, { duration: 3000 });
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error('Error adding spending:', error);
+        // Call edge function to process payment and create bounty
+        const { data, error } = await supabase.functions.invoke('create-bounty-with-payment', {
+          body: {
+            title: newRequest.title,
+            description: newRequest.description,
+            bounty: bountyAmount,
+            category: newRequest.category,
+            deadline: `${newRequest.deadline} days`,
+            allow_contributions: newRequest.allowContributions,
+            minimum_contribution: parseFloat(newRequest.minimumContribution) || 0,
+            is_anonymous: false
+          }
+        });
+
+        if (error) throw error;
+        if (data.error) throw new Error(data.error);
+
+        toast.success(`✨ Bounty posted! Payment of $${bountyAmount} processed from your wallet`, { 
+          duration: 4000 
+        });
+        
+        setShowCreateModal(false);
+        setNewRequest({ 
+          title: '', 
+          description: '', 
+          bounty: '', 
+          category: 'Photography', 
+          deadline: '3', 
+          allowContributions: true, 
+          minimumContribution: '0' 
+        });
+
+        // Refresh the page to show new bounty
+        window.location.reload();
+        
+      } catch (error: any) {
+        console.error('Error creating bounty:', error);
+        const errorMsg = error.message || 'Failed to create bounty';
+        
+        if (errorMsg.includes('Insufficient balance')) {
+          toast.error(
+            `${errorMsg}. Please deposit funds to your wallet first.`,
+            { duration: 5000 }
+          );
+          // Optionally navigate to wallet page
+          setTimeout(() => navigate('/wallet'), 2000);
+        } else if (errorMsg.includes('Wallet not found')) {
+          toast.error('Please deposit funds to your wallet first', { duration: 4000 });
+          setTimeout(() => navigate('/wallet'), 2000);
+        } else {
+          toast.error(errorMsg, { duration: 4000 });
         }
-        toast.success('✨ Request posted! AI is now scanning for matches...', { duration: 3000 });
       }
+    } else {
+      toast.error('Please fill in all required fields', { duration: 3000 });
     }
   };
 
