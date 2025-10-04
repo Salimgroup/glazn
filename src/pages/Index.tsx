@@ -26,6 +26,7 @@ import { OnboardingFlow } from '@/components/OnboardingFlow';
 import { useMatchScore } from '@/hooks/useMatchScore';
 import { CommunalBountyCard } from '@/components/CommunalBountyCard';
 import { ContributorsList } from '@/components/ContributorsList';
+import { CounterOfferResponseModal } from '@/components/CounterOfferResponseModal';
 import {
   Dialog,
   DialogContent,
@@ -98,7 +99,22 @@ export default function Glazn() {
     }
   ]);
 
-  const [requests, setRequests] = useState([
+  const [requests, setRequests] = useState<Array<{
+    id: number;
+    title: string;
+    description: string;
+    bounty: number;
+    requester: string;
+    category: string;
+    deadline: string;
+    submissions: number;
+    status: string;
+    aiMatched: any[];
+    createdAt: number;
+    counter_offer_amount?: number;
+    counter_offer_status?: 'pending' | 'accepted' | 'rejected' | null;
+    counter_offered_at?: string;
+  }>>([
     {
       id: 1,
       title: 'Sunset Beach Photography',
@@ -152,6 +168,12 @@ export default function Glazn() {
   const [manageContributions, setManageContributions] = useState<{ id: number; title: string } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [isGeneratingBounty, setIsGeneratingBounty] = useState(false);
+  const [counterOfferResponse, setCounterOfferResponse] = useState<{ 
+    requestId: string; 
+    requestTitle: string; 
+    originalBounty: number; 
+    counterOfferAmount: number; 
+  } | null>(null);
   
   const { getMatchBadgeColor, getMatchLabel } = useMatchScore();
 
@@ -798,6 +820,44 @@ export default function Glazn() {
                         </div>
                       </div>
 
+                      {/* Counter-Offer Indicator for Requesters */}
+                      {request.requester === 'You' && request.counter_offer_status === 'pending' && request.counter_offer_amount && (
+                        <div className="mb-4 p-4 bg-neon-yellow/10 border-2 border-neon-yellow/40 rounded-xl animate-pulse">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <TrendingUp className="w-5 h-5 text-neon-yellow" />
+                              <span className="text-sm font-bold text-neon-yellow uppercase">Counter-Offer Received</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Creator proposes</p>
+                              <p className="text-2xl font-black text-neon-yellow">${request.counter_offer_amount.toLocaleString()}</p>
+                            </div>
+                            <Button
+                              onClick={() => setCounterOfferResponse({
+                                requestId: request.id.toString(),
+                                requestTitle: request.title,
+                                originalBounty: request.bounty,
+                                counterOfferAmount: request.counter_offer_amount!
+                              })}
+                              className="bg-gradient-to-r from-neon-yellow to-neon-pink text-white font-bold shadow-neon hover:shadow-glow"
+                            >
+                              Review Offer
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      {request.requester === 'You' && request.counter_offer_status === 'accepted' && (
+                        <div className="mb-4 p-3 bg-green-500/10 border-2 border-green-500/40 rounded-xl">
+                          <div className="flex items-center gap-2 mb-1">
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                            <span className="text-xs font-bold text-green-500 uppercase">Counter-Offer Accepted</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">New bounty: <span className="font-black text-green-500">${request.counter_offer_amount?.toLocaleString()}</span></p>
+                        </div>
+                      )}
+
                       {/* Actions */}
                       <div className="flex gap-2">
                       {request.requester === 'You' && (
@@ -1376,6 +1436,23 @@ export default function Glazn() {
           onClose={() => setManageContributions(null)}
           requestId={manageContributions.id.toString()}
           requestTitle={manageContributions.title}
+        />
+      )}
+
+      {/* Counter-Offer Response Modal */}
+      {counterOfferResponse && (
+        <CounterOfferResponseModal
+          open={!!counterOfferResponse}
+          onOpenChange={(open) => !open && setCounterOfferResponse(null)}
+          requestId={counterOfferResponse.requestId}
+          requestTitle={counterOfferResponse.requestTitle}
+          originalBounty={counterOfferResponse.originalBounty}
+          counterOfferAmount={counterOfferResponse.counterOfferAmount}
+          onSuccess={() => {
+            // Refresh the bounties list after counter-offer response
+            toast.success('Counter-offer response recorded!');
+            setCounterOfferResponse(null);
+          }}
         />
       )}
 

@@ -14,6 +14,9 @@ export interface ContentCreatorRequest {
   is_anonymous: boolean;
   requester_name: string;
   created_at: string;
+  counter_offer_amount?: number;
+  counter_offer_status?: 'pending' | 'accepted' | 'rejected' | null;
+  counter_offered_at?: string;
 }
 
 export function useContentCreatorRequests() {

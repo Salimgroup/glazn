@@ -372,6 +372,9 @@ export type Database = {
           bounty: number
           category: string
           content_creator_id: string | null
+          counter_offer_amount: number | null
+          counter_offer_status: string | null
+          counter_offered_at: string | null
           created_at: string | null
           deadline: string
           description: string
@@ -393,6 +396,9 @@ export type Database = {
           bounty: number
           category: string
           content_creator_id?: string | null
+          counter_offer_amount?: number | null
+          counter_offer_status?: string | null
+          counter_offered_at?: string | null
           created_at?: string | null
           deadline: string
           description: string
@@ -414,6 +420,9 @@ export type Database = {
           bounty?: number
           category?: string
           content_creator_id?: string | null
+          counter_offer_amount?: number | null
+          counter_offer_status?: string | null
+          counter_offered_at?: string | null
           created_at?: string | null
           deadline?: string
           description?: string
