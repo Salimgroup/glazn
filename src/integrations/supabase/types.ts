@@ -625,6 +625,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_status: {
+        Row: {
+          bounties_completed: number
+          bounties_paid: number
+          created_at: string | null
+          creator_points: number
+          creator_tier: Database["public"]["Enums"]["status_tier"]
+          id: string
+          requester_points: number
+          requester_tier: Database["public"]["Enums"]["status_tier"]
+          total_paid_amount: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          bounties_completed?: number
+          bounties_paid?: number
+          created_at?: string | null
+          creator_points?: number
+          creator_tier?: Database["public"]["Enums"]["status_tier"]
+          id?: string
+          requester_points?: number
+          requester_tier?: Database["public"]["Enums"]["status_tier"]
+          total_paid_amount?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          bounties_completed?: number
+          bounties_paid?: number
+          created_at?: string | null
+          creator_points?: number
+          creator_tier?: Database["public"]["Enums"]["status_tier"]
+          id?: string
+          requester_points?: number
+          requester_tier?: Database["public"]["Enums"]["status_tier"]
+          total_paid_amount?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       wallet_balances: {
         Row: {
           available_balance: number
@@ -689,6 +731,10 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_tier: {
+        Args: { points: number }
+        Returns: Database["public"]["Enums"]["status_tier"]
+      }
       complete_payout_atomic: {
         Args: { p_amount: number; p_user_id: string }
         Returns: Json
@@ -716,10 +762,25 @@ export type Database = {
         Args: { p_amount: number; p_user_id: string }
         Returns: Json
       }
+      update_creator_status: {
+        Args: { p_bounty_amount: number; p_user_id: string }
+        Returns: undefined
+      }
+      update_requester_status: {
+        Args: { p_bounty_amount: number; p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
       payment_method: "stripe" | "xrp" | "solana"
+      status_tier:
+        | "glass_beginner"
+        | "glass_collector"
+        | "glass_enthusiast"
+        | "glass_connoisseur"
+        | "glass_royalty"
+        | "glass_legend"
       submission_status: "pending" | "approved" | "rejected"
       submission_type: "upload" | "external_url"
       transaction_status:
@@ -866,6 +927,14 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user"],
       payment_method: ["stripe", "xrp", "solana"],
+      status_tier: [
+        "glass_beginner",
+        "glass_collector",
+        "glass_enthusiast",
+        "glass_connoisseur",
+        "glass_royalty",
+        "glass_legend",
+      ],
       submission_status: ["pending", "approved", "rejected"],
       submission_type: ["upload", "external_url"],
       transaction_status: [
