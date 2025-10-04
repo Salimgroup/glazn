@@ -27,6 +27,7 @@ export interface UserStatus {
 export function useUserStatus(userId?: string) {
   const { user } = useAuth();
   const targetUserId = userId || user?.id;
+  const isOwnStatus = user?.id === targetUserId;
   const [status, setStatus] = useState<UserStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -38,8 +39,12 @@ export function useUserStatus(userId?: string) {
     }
 
     const fetchStatus = async () => {
+      // Use full user_status table for own status (includes sensitive data)
+      // Use public_user_status view for others (excludes points and financial data)
+      const tableName = isOwnStatus ? 'user_status' : 'public_user_status';
+      
       const { data, error } = await supabase
-        .from('user_status')
+        .from(tableName)
         .select('*')
         .eq('user_id', targetUserId)
         .maybeSingle();
@@ -57,6 +62,7 @@ export function useUserStatus(userId?: string) {
     fetchStatus();
 
     // Subscribe to realtime updates
+    // Only subscribe to full user_status for own status
     const channel = supabase
       .channel('user-status-changes')
       .on(
@@ -64,7 +70,7 @@ export function useUserStatus(userId?: string) {
         {
           event: '*',
           schema: 'public',
-          table: 'user_status',
+          table: isOwnStatus ? 'user_status' : 'public_user_status',
           filter: `user_id=eq.${targetUserId}`,
         },
         (payload) => {
@@ -78,7 +84,7 @@ export function useUserStatus(userId?: string) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [targetUserId]);
+  }, [targetUserId, isOwnStatus]);
 
-  return { status, loading };
+  return { status, loading, isOwnStatus };
 }

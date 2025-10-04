@@ -815,6 +815,36 @@ export type Database = {
         }
         Relationships: []
       }
+      public_user_status: {
+        Row: {
+          bounties_completed: number | null
+          bounties_paid: number | null
+          created_at: string | null
+          creator_tier: Database["public"]["Enums"]["status_tier"] | null
+          requester_tier: Database["public"]["Enums"]["status_tier"] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bounties_completed?: number | null
+          bounties_paid?: number | null
+          created_at?: string | null
+          creator_tier?: Database["public"]["Enums"]["status_tier"] | null
+          requester_tier?: Database["public"]["Enums"]["status_tier"] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bounties_completed?: number | null
+          bounties_paid?: number | null
+          created_at?: string | null
+          creator_tier?: Database["public"]["Enums"]["status_tier"] | null
+          requester_tier?: Database["public"]["Enums"]["status_tier"] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_tier: {

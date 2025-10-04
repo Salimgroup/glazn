@@ -10,7 +10,7 @@ interface UserStatusCardProps {
 }
 
 export function UserStatusCard({ userId, mode }: UserStatusCardProps) {
-  const { status, loading } = useUserStatus(userId);
+  const { status, loading, isOwnStatus } = useUserStatus(userId);
 
   if (loading) {
     return (
@@ -26,7 +26,11 @@ export function UserStatusCard({ userId, mode }: UserStatusCardProps) {
   }
 
   const isCreator = mode === 'creator';
-  const points = isCreator ? status.creator_points : status.requester_points;
+  // Points are only available for own status, otherwise show tier-based placeholder
+  const hasPoints = 'creator_points' in status && 'requester_points' in status;
+  const points = hasPoints 
+    ? (isCreator ? status.creator_points : status.requester_points)
+    : 0;
   const tier = isCreator ? status.creator_tier : status.requester_tier;
   const count = isCreator ? status.bounties_completed : status.bounties_paid;
   const title = isCreator ? 'Creator Status' : 'Requester Status';
@@ -49,12 +53,21 @@ export function UserStatusCard({ userId, mode }: UserStatusCardProps) {
             title={tier.replace('glass_', '').replace('_', ' ')}
             showTitle={false}
           />
-          <div>
-            <p className="text-2xl font-black bg-gradient-neon bg-clip-text text-transparent">
-              {points.toLocaleString()}
-            </p>
-            <p className="text-sm text-muted-foreground">Glazn Points</p>
-          </div>
+          {isOwnStatus && hasPoints ? (
+            <div>
+              <p className="text-2xl font-black bg-gradient-neon bg-clip-text text-transparent">
+                {points.toLocaleString()}
+              </p>
+              <p className="text-sm text-muted-foreground">Glazn Points</p>
+            </div>
+          ) : (
+            <div>
+              <p className="text-lg font-semibold text-muted-foreground">
+                {tier.replace('glass_', '').replace('_', ' ').toUpperCase()}
+              </p>
+              <p className="text-xs text-muted-foreground/70">Tier Status</p>
+            </div>
+          )}
         </div>
 
         <div className="pt-2">
@@ -64,10 +77,12 @@ export function UserStatusCard({ userId, mode }: UserStatusCardProps) {
             </span>
             <span className="text-sm font-bold">{count}</span>
           </div>
-          <StatusProgress currentSpending={points} currentTier={tier as any} />
+          {isOwnStatus && hasPoints && (
+            <StatusProgress currentSpending={points} currentTier={tier as any} />
+          )}
         </div>
 
-        {!isCreator && status.total_paid_amount > 0 && (
+        {isOwnStatus && !isCreator && 'total_paid_amount' in status && status.total_paid_amount > 0 && (
           <div className="pt-2 border-t border-border">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Total Paid Out</span>

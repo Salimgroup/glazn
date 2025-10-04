@@ -31,6 +31,28 @@ export function filterProfileData<T extends Record<string, any>>(
 }
 
 /**
+ * Public user status data type - excludes sensitive fields
+ */
+export interface PublicUserStatus {
+  user_id: string;
+  creator_tier: string;
+  requester_tier: string;
+  bounties_completed: number;
+  bounties_paid: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Full user status data type - includes sensitive fields
+ */
+export interface FullUserStatus extends PublicUserStatus {
+  creator_points: number;
+  requester_points: number;
+  total_paid_amount: number;
+}
+
+/**
  * Filters out sensitive data from user_status table
  * when viewing other users' status
  */
@@ -53,6 +75,17 @@ export function filterUserStatusData<T extends Record<string, any>>(
   } = status;
   
   return publicData as T;
+}
+
+/**
+ * Type guard to check if status data includes sensitive fields
+ */
+export function hasFinancialData(
+  status: PublicUserStatus | FullUserStatus
+): status is FullUserStatus {
+  return 'creator_points' in status && 
+         'requester_points' in status && 
+         'total_paid_amount' in status;
 }
 
 /**
