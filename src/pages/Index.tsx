@@ -24,6 +24,8 @@ import { BountyReactions } from '@/components/BountyReactions';
 import { ContentCreatorDashboard } from '@/components/ContentCreatorDashboard';
 import { OnboardingFlow } from '@/components/OnboardingFlow';
 import { useMatchScore } from '@/hooks/useMatchScore';
+import { CommunalBountyCard } from '@/components/CommunalBountyCard';
+import { ContributorsList } from '@/components/ContributorsList';
 import {
   Dialog,
   DialogContent,
@@ -732,12 +734,15 @@ export default function Glazn() {
                     )}
 
                     <div className="p-5">
-                      {/* Bounty Amount - HUGE */}
-                      <div className="mb-4 text-center py-4 bg-gradient-to-r from-neon-pink/20 to-neon-purple/20 rounded-xl border-2 border-neon-yellow/40">
-                        <div className="text-5xl font-black text-transparent bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-cyan bg-clip-text mb-1">
-                          ${request.bounty}
-                        </div>
-                        <div className="text-xs text-neon-yellow font-bold uppercase tracking-widest">TOTAL BOUNTY</div>
+                      {/* Communal Bounty Card */}
+                      <div className="mb-4">
+                        <CommunalBountyCard 
+                          requestId={request.id.toString()}
+                          baseBounty={request.bounty}
+                          allowContributions={true}
+                          minimumContribution={0}
+                          showContributors={true}
+                        />
                       </div>
 
                       {/* Category Badge */}
@@ -814,6 +819,15 @@ export default function Glazn() {
                       {/* Bounty Reactions */}
                       <div className="mt-4 pt-4 border-t border-neon-purple/20">
                         <BountyReactions requestId={request.id.toString()} />
+                      </div>
+
+                      {/* Contributors List */}
+                      <div className="mt-4 pt-4 border-t border-neon-purple/20">
+                        <ContributorsList 
+                          requestId={request.id.toString()}
+                          showPending={request.requester === 'You'}
+                          maxDisplay={3}
+                        />
                       </div>
 
                       {/* Submissions Count */}
