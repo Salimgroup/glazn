@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy, Link as LinkIcon, FileCheck, DollarSign, Plus, HelpCircle, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { StatusBadge, StatusProgress } from '@/components/StatusBadge';
 import { useUserSpending } from '@/hooks/useUserSpending';
@@ -21,6 +22,8 @@ import { QuickStatsCard } from '@/components/QuickStatsCard';
 import { TrendingBountiesSection } from '@/components/TrendingBountiesSection';
 import { BountyReactions } from '@/components/BountyReactions';
 import { ContentCreatorDashboard } from '@/components/ContentCreatorDashboard';
+import { OnboardingFlow } from '@/components/OnboardingFlow';
+import { useMatchScore } from '@/hooks/useMatchScore';
 import {
   Dialog,
   DialogContent,
@@ -145,6 +148,10 @@ export default function Glazn() {
   const [shareableBounty, setShareableBounty] = useState<{ id: number; title: string } | null>(null);
   const [contributeToBounty, setContributeToBounty] = useState<{ id: number; title: string; bounty: number; minimumContribution?: number } | null>(null);
   const [manageContributions, setManageContributions] = useState<{ id: number; title: string } | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [isGeneratingBounty, setIsGeneratingBounty] = useState(false);
+  
+  const { getMatchBadgeColor, getMatchLabel } = useMatchScore();
 
   const [newPortfolioItem, setNewPortfolioItem] = useState({
     title: '',
@@ -276,6 +283,42 @@ export default function Glazn() {
     return filtered;
   }, [requests, searchQuery, selectedCategory, bountyRange, sortBy]);
 
+  const handleGenerateAIBounty = async () => {
+    if (!newRequest.description) {
+      toast.error('Please enter a description first');
+      return;
+    }
+
+    setIsGeneratingBounty(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-bounty-template', {
+        body: { 
+          description: newRequest.description,
+          category: newRequest.category 
+        }
+      });
+
+      if (error) throw error;
+
+      // Fill in the form with AI-generated data
+      setNewRequest(prev => ({
+        ...prev,
+        title: data.title,
+        description: data.description,
+        bounty: data.suggestedBounty.toString(),
+        category: data.category,
+        deadline: data.deadline
+      }));
+
+      toast.success('✨ AI generated your bounty template!', { duration: 3000 });
+    } catch (error) {
+      console.error('Error generating bounty:', error);
+      toast.error('Failed to generate bounty template. Try again.');
+    } finally {
+      setIsGeneratingBounty(false);
+    }
+  };
+
   const handleCreateRequest = async () => {
     if (newRequest.title && newRequest.description && newRequest.bounty) {
       const bountyAmount = parseInt(newRequest.bounty);
@@ -327,12 +370,6 @@ export default function Glazn() {
       
       toast.success('🎨 Added to portfolio! AI will auto-submit to matching requests', { duration: 3000 });
     }
-  };
-
-  const getMatchBadgeColor = (score: number) => {
-    if (score >= 70) return 'from-green-500 to-emerald-500';
-    if (score >= 50) return 'from-yellow-500 to-orange-500';
-    return 'from-blue-500 to-cyan-500';
   };
 
   const handleInfluencerBounty = (influencer: any) => {
@@ -1080,6 +1117,14 @@ export default function Glazn() {
                   rows={4}
                   className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 resize-none"
                 />
+                <Button
+                  onClick={handleGenerateAIBounty}
+                  disabled={!newRequest.description || isGeneratingBounty}
+                  className="mt-2 bg-gradient-neon hover:shadow-glow text-white font-bold"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {isGeneratingBounty ? 'Generating...' : '✨ Generate with AI'}
+                </Button>
               </div>
 
               <div className="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4">
@@ -1285,6 +1330,14 @@ export default function Glazn() {
           onClose={() => setManageContributions(null)}
           requestId={manageContributions.id.toString()}
           requestTitle={manageContributions.title}
+        />
+      )}
+
+      {/* Onboarding Flow */}
+      {showOnboarding && (
+        <OnboardingFlow
+          userType="creator"
+          onComplete={() => setShowOnboarding(false)}
         />
       )}
     </div>
