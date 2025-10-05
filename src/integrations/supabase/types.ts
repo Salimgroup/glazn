@@ -47,6 +47,13 @@ export type Database = {
             foreignKeyName: "activity_feed_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "profile_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_feed_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -148,6 +155,13 @@ export type Database = {
             foreignKeyName: "bounty_reactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "profile_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bounty_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -156,6 +170,76 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_posts: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          external_url: string | null
+          id: string
+          is_public: boolean | null
+          owner_id: string
+          platform_name: string | null
+          request_id: string
+          submission_id: string
+          title: string
+          updated_at: string | null
+          view_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          external_url?: string | null
+          id?: string
+          is_public?: boolean | null
+          owner_id: string
+          platform_name?: string | null
+          request_id: string
+          submission_id: string
+          title: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          external_url?: string | null
+          id?: string
+          is_public?: boolean | null
+          owner_id?: string
+          platform_name?: string | null
+          request_id?: string
+          submission_id?: string
+          title?: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_posts_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "content_creator_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_posts_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_posts_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
             referencedColumns: ["id"]
           },
         ]
@@ -184,6 +268,13 @@ export type Database = {
             foreignKeyName: "follows_follower_id_fkey"
             columns: ["follower_id"]
             isOneToOne: false
+            referencedRelation: "profile_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -192,6 +283,13 @@ export type Database = {
             columns: ["follower_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profile_stats"
             referencedColumns: ["id"]
           },
           {
@@ -242,6 +340,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_stats"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
@@ -518,6 +623,8 @@ export type Database = {
       }
       submissions: {
         Row: {
+          allow_owner_reshare: boolean | null
+          allow_public_share: boolean | null
           created_at: string | null
           creator_id: string
           description: string | null
@@ -529,12 +636,15 @@ export type Database = {
           request_id: string
           reviewed_at: string | null
           reviewed_by: string | null
+          sharing_terms: string | null
           status: Database["public"]["Enums"]["submission_status"]
           submission_type: Database["public"]["Enums"]["submission_type"]
           title: string
           updated_at: string | null
         }
         Insert: {
+          allow_owner_reshare?: boolean | null
+          allow_public_share?: boolean | null
           created_at?: string | null
           creator_id: string
           description?: string | null
@@ -546,12 +656,15 @@ export type Database = {
           request_id: string
           reviewed_at?: string | null
           reviewed_by?: string | null
+          sharing_terms?: string | null
           status?: Database["public"]["Enums"]["submission_status"]
           submission_type?: Database["public"]["Enums"]["submission_type"]
           title: string
           updated_at?: string | null
         }
         Update: {
+          allow_owner_reshare?: boolean | null
+          allow_public_share?: boolean | null
           created_at?: string | null
           creator_id?: string
           description?: string | null
@@ -563,6 +676,7 @@ export type Database = {
           request_id?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
+          sharing_terms?: string | null
           status?: Database["public"]["Enums"]["submission_status"]
           submission_type?: Database["public"]["Enums"]["submission_type"]
           title?: string
@@ -770,6 +884,25 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
           view_count: number | null
+        }
+        Relationships: []
+      }
+      profile_stats: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          bounties_completed: number | null
+          bounties_posted: number | null
+          content_count: number | null
+          created_at: string | null
+          display_name: string | null
+          follower_count: number | null
+          id: string | null
+          is_content_creator: boolean | null
+          portfolio_url: string | null
+          reputation_score: number | null
+          username: string | null
+          verified: boolean | null
         }
         Relationships: []
       }
