@@ -183,9 +183,12 @@ export default function Index() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <UserAvatar ethnicity="mixed" size="md" />
-              <h1 className="text-xl font-black bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                Glazn
-              </h1>
+              <div>
+                <h1 className="text-xl font-black bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                  Glazn
+                </h1>
+                <p className="text-[10px] text-muted-foreground -mt-1">Bespoke Content Marketplace</p>
+              </div>
             </div>
             
             <div className="flex items-center gap-2">
@@ -223,13 +226,13 @@ export default function Index() {
               <TabsTrigger value="my-requests">My Requests</TabsTrigger>
             </TabsList>
 
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Post Bounty
-            </Button>
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-gradient-to-r from-primary to-secondary text-primary-foreground flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Request Content
+              </Button>
           </div>
 
           {/* Browse Bounties Tab */}
@@ -322,10 +325,10 @@ export default function Index() {
             {myRequests.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground mb-4">You haven't posted any bounties yet</p>
+                  <p className="text-muted-foreground mb-4">You haven't requested any bespoke content yet</p>
                   <Button onClick={() => setShowCreateModal(true)}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Post Your First Bounty
+                    Request Your First Content
                   </Button>
                 </CardContent>
               </Card>
@@ -392,9 +395,9 @@ export default function Index() {
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Post a New Bounty</DialogTitle>
+            <DialogTitle>Request Bespoke Content</DialogTitle>
             <DialogDescription>
-              Create a request for content. Funds will be held in escrow until you approve a submission.
+              Create a request for bespoke, custom content. Funds will be held in escrow until you approve a submission.
             </DialogDescription>
           </DialogHeader>
 
@@ -402,7 +405,7 @@ export default function Index() {
             <div>
               <label className="text-sm font-medium mb-2 block">Title</label>
               <Input
-                placeholder="E.g., Sunset Beach Photography"
+                placeholder="E.g., Bespoke Sunset Beach Photography"
                 value={newRequest.title}
                 onChange={(e) => setNewRequest({ ...newRequest, title: e.target.value })}
               />
@@ -411,7 +414,7 @@ export default function Index() {
             <div>
               <label className="text-sm font-medium mb-2 block">Description</label>
               <Textarea
-                placeholder="Describe what you're looking for..."
+                placeholder="Describe your bespoke content requirements in detail..."
                 value={newRequest.description}
                 onChange={(e) => setNewRequest({ ...newRequest, description: e.target.value })}
                 rows={4}
