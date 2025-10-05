@@ -1,32 +1,21 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Crown, Sparkles, Users, CheckCircle, Clock, Star, Search, Filter, TrendingUp, Zap, Target, Award, LogOut, Trophy, Link as LinkIcon, FileCheck, DollarSign, Plus, HelpCircle, BarChart3 } from 'lucide-react';
+import { Plus, LogOut, Wallet, Search, DollarSign, Clock, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { StatusBadge, StatusProgress } from '@/components/StatusBadge';
-import { useUserSpending } from '@/hooks/useUserSpending';
 import { ExternalSubmissionModal } from '@/components/ExternalSubmissionModal';
 import { SubmissionsManagementModal } from '@/components/SubmissionsManagementModal';
 import { UserAvatar } from '@/components/UserAvatar';
-import { BountyTicker } from '@/components/BountyTicker';
-import { InfluencerBounties } from '@/components/InfluencerBounties';
-import { ShareableBountyLink } from '@/components/ShareableBountyLink';
-import { ContributeToBountyModal } from '@/components/ContributeToBountyModal';
-import { ContributionsManagementModal } from '@/components/ContributionsManagementModal';
-import { LiveActivityFeed } from '@/components/LiveActivityFeed';
-import { LeaderboardPanel } from '@/components/LeaderboardPanel';
 import { NotificationBell } from '@/components/NotificationBell';
-import { QuickStatsCard } from '@/components/QuickStatsCard';
-import { TrendingBountiesSection } from '@/components/TrendingBountiesSection';
-import { BountyReactions } from '@/components/BountyReactions';
-import { ContentCreatorDashboard } from '@/components/ContentCreatorDashboard';
-import { OnboardingFlow } from '@/components/OnboardingFlow';
-import { useMatchScore } from '@/hooks/useMatchScore';
-import { CommunalBountyCard } from '@/components/CommunalBountyCard';
-import { ContributorsList } from '@/components/ContributorsList';
-import { CounterOfferResponseModal } from '@/components/CounterOfferResponseModal';
+import { ContentCollection } from '@/components/ContentCollection';
+import { TopCreatorsPanel } from '@/components/TopCreatorsPanel';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -35,494 +24,180 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-export default function Glazn() {
-  const { user, signOut, loading } = useAuth();
-  const { spending, addSpending } = useUserSpending();
-  const navigate = useNavigate();
-  const COMMISSION_RATE = 0.20;
+interface Request {
+  id: string;
+  title: string;
+  description: string;
+  bounty: number;
+  category: string;
+  deadline: string;
+  status: string;
+  is_anonymous: boolean;
+  created_at: string;
+  user_id: string;
+}
 
-  // Redirect to auth if not logged in
+export default function Index() {
+  const { user, signOut, loading } = useAuth();
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
 
-  const [showStatusModal, setShowStatusModal] = useState(false);
-
-  const calculateCreatorPayout = (bounty: number) => {
-    return (bounty * (1 - COMMISSION_RATE)).toFixed(2);
-  };
-
-  const calculateCommission = (bounty: number) => {
-    return (bounty * COMMISSION_RATE).toFixed(2);
-  };
-
   const [activeTab, setActiveTab] = useState('browse');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [bountyRange, setBountyRange] = useState<[number, number]>([0, 1000]);
-  const [sortBy, setSortBy] = useState('newest');
-  const [showFilters, setShowFilters] = useState(false);
-
-  // Portfolio state
-  const [portfolio, setPortfolio] = useState([
-    {
-      id: 1,
-      title: 'Golden Hour Beach Set',
-      description: 'Collection of sunset beach photos with golden lighting',
-      tags: ['beach', 'sunset', 'golden hour', 'photography', 'ocean', 'waves'],
-      type: 'Photography',
-      thumbnail: '🌅',
-      autoSubmit: true,
-      timesUsed: 3
-    },
-    {
-      id: 2,
-      title: 'Urban Street Photography',
-      description: 'Street art and urban landscape photos',
-      tags: ['urban', 'street', 'art', 'graffiti', 'city', 'photography'],
-      type: 'Photography',
-      thumbnail: '🏙️',
-      autoSubmit: true,
-      timesUsed: 5
-    },
-    {
-      id: 3,
-      title: 'Product Showcase Video',
-      description: 'Professional product unboxing and review template',
-      tags: ['product', 'unboxing', 'video', 'review', 'tech'],
-      type: 'Video',
-      thumbnail: '📦',
-      autoSubmit: true,
-      timesUsed: 2
-    }
-  ]);
-
-  const [requests, setRequests] = useState<Array<{
-    id: number;
-    title: string;
-    description: string;
-    bounty: number;
-    requester: string;
-    category: string;
-    deadline: string;
-    submissions: number;
-    status: string;
-    aiMatched: any[];
-    createdAt: number;
-    counter_offer_amount?: number;
-    counter_offer_status?: 'pending' | 'accepted' | 'rejected' | null;
-    counter_offered_at?: string;
-  }>>([
-    {
-      id: 1,
-      title: 'Sunset Beach Photography',
-      description: 'Looking for high-quality sunset photos at a beach location. Should capture golden hour lighting with waves.',
-      bounty: 150,
-      requester: 'Sarah M.',
-      category: 'Photography',
-      deadline: '3 days',
-      submissions: 7,
-      status: 'open',
-      aiMatched: [],
-      createdAt: Date.now() - 86400000
-    },
-    {
-      id: 2,
-      title: 'Product Unboxing Video',
-      description: 'Need a 2-3 minute unboxing video for tech product. Professional lighting and clear audio required.',
-      bounty: 200,
-      requester: 'TechStart Inc.',
-      category: 'Video',
-      deadline: '5 days',
-      submissions: 12,
-      status: 'open',
-      aiMatched: [],
-      createdAt: Date.now() - 172800000
-    },
-    {
-      id: 3,
-      title: 'Urban Street Art Photos',
-      description: 'Collection of 10 photos featuring street art and murals in urban settings.',
-      bounty: 100,
-      requester: 'Mike D.',
-      category: 'Photography',
-      deadline: '7 days',
-      submissions: 15,
-      status: 'open',
-      aiMatched: [],
-      createdAt: Date.now() - 259200000
-    }
-  ]);
+  const [requests, setRequests] = useState<Request[]>([]);
+  const [myRequests, setMyRequests] = useState<Request[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showPortfolioModal, setShowPortfolioModal] = useState(false);
-  const [showAISettings, setShowAISettings] = useState(false);
-  const [aiEnabled, setAiEnabled] = useState(true);
-  const [autoSubmissions, setAutoSubmissions] = useState<any[]>([]);
-  const [showExternalSubmission, setShowExternalSubmission] = useState<{ id: number; title: string } | null>(null);
-  const [showSubmissionsManagement, setShowSubmissionsManagement] = useState<{ id: number; title: string; userId: string } | null>(null);
-  const [shareableBounty, setShareableBounty] = useState<{ id: number; title: string } | null>(null);
-  const [contributeToBounty, setContributeToBounty] = useState<{ id: number; title: string; bounty: number; minimumContribution?: number } | null>(null);
-  const [manageContributions, setManageContributions] = useState<{ id: number; title: string } | null>(null);
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  const [isGeneratingBounty, setIsGeneratingBounty] = useState(false);
-  const [counterOfferResponse, setCounterOfferResponse] = useState<{ 
-    requestId: string; 
-    requestTitle: string; 
-    originalBounty: number; 
-    counterOfferAmount: number; 
-  } | null>(null);
-  
-  const { getMatchBadgeColor, getMatchLabel } = useMatchScore();
-
-  const [newPortfolioItem, setNewPortfolioItem] = useState({
-    title: '',
-    description: '',
-    tags: '',
-    type: 'Photography',
-    autoSubmit: true
-  });
+  const [showExternalSubmission, setShowExternalSubmission] = useState<{ id: string; title: string } | null>(null);
+  const [showSubmissionsManagement, setShowSubmissionsManagement] = useState<{ id: string; title: string; userId: string } | null>(null);
 
   const [newRequest, setNewRequest] = useState({
     title: '',
     description: '',
     bounty: '',
     category: 'Photography',
-    deadline: '3',
-    allowContributions: true,
-    minimumContribution: '0'
+    deadline: '7'
   });
 
   const categories = ['All', 'Photography', 'Video', 'Digital Art', 'Graphic Design', '3D Rendering', 'Animation', 'Writing', 'Music'];
 
-  // AI Matching Logic
-  const calculateMatchScore = (requestText: string, portfolioTags: string[]) => {
-    const requestWords = requestText.toLowerCase().split(/\s+/);
-    let matches = 0;
-    let totalWeight = 0;
-
-    portfolioTags.forEach(tag => {
-      const tagWords = tag.toLowerCase().split(/\s+/);
-      tagWords.forEach(tagWord => {
-        requestWords.forEach(requestWord => {
-          if (requestWord.includes(tagWord) || tagWord.includes(requestWord)) {
-            matches++;
-            totalWeight++;
-          }
-        });
-      });
-    });
-
-    const score = Math.min(100, (matches / Math.max(requestWords.length, 1)) * 100);
-    return Math.round(score);
-  };
-
-  const getMatchedPortfolioItems = (request: any) => {
-    if (!aiEnabled) return [];
-    
-    return portfolio
-      .filter(item => item.autoSubmit)
-      .map(item => ({
-        ...item,
-        matchScore: calculateMatchScore(
-          `${request.title} ${request.description}`,
-          item.tags
-        )
-      }))
-      .filter(item => item.matchScore > 30)
-      .sort((a, b) => b.matchScore - a.matchScore);
-  };
-
-  // Auto-submit when new request is created
   useEffect(() => {
-    requests.forEach(request => {
-      if (!request.aiMatched || request.aiMatched.length === 0) {
-        const matches = getMatchedPortfolioItems(request);
-        if (matches.length > 0 && aiEnabled) {
-          // Update request with matched items
-          setRequests(prev => prev.map(r => 
-            r.id === request.id 
-              ? { ...r, aiMatched: matches.map(m => m.id) }
-              : r
-          ));
-
-          // Show notification
-          matches.forEach(match => {
-            toast.success(
-              `🎯 AI Auto-Submit: "${match.title}" matched with "${request.title}" (${match.matchScore}% match)`,
-              { duration: 5000 }
-            );
-          });
-
-          // Track auto-submission
-          setAutoSubmissions(prev => [
-            ...prev,
-            {
-              requestId: request.id,
-              portfolioItems: matches,
-              timestamp: Date.now()
-            }
-          ]);
-        }
-      }
-    });
-  }, [requests, aiEnabled]);
-
-  // Filtered and sorted requests
-  const filteredRequests = useMemo(() => {
-    let filtered = requests.filter(request => {
-      const matchesSearch = 
-        request.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        request.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesCategory = 
-        selectedCategory === 'All' || request.category === selectedCategory;
-      
-      const matchesBounty = 
-        request.bounty >= bountyRange[0] && request.bounty <= bountyRange[1];
-
-      return matchesSearch && matchesCategory && matchesBounty;
-    });
-
-    // Sort
-    switch (sortBy) {
-      case 'newest':
-        filtered.sort((a, b) => b.createdAt - a.createdAt);
-        break;
-      case 'bounty-high':
-        filtered.sort((a, b) => b.bounty - a.bounty);
-        break;
-      case 'bounty-low':
-        filtered.sort((a, b) => a.bounty - b.bounty);
-        break;
-      case 'deadline':
-        filtered.sort((a, b) => 
-          parseInt(a.deadline) - parseInt(b.deadline)
-        );
-        break;
+    if (user) {
+      fetchRequests();
+      fetchMyRequests();
     }
+  }, [user]);
 
-    return filtered;
-  }, [requests, searchQuery, selectedCategory, bountyRange, sortBy]);
-
-  const handleGenerateAIBounty = async () => {
-    if (!newRequest.description) {
-      toast.error('Please enter a description first');
-      return;
-    }
-
-    setIsGeneratingBounty(true);
+  const fetchRequests = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('generate-bounty-template', {
-        body: { 
-          description: newRequest.description,
-          category: newRequest.category 
-        }
-      });
+      const { data, error } = await supabase
+        .from('requests')
+        .select('*')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-
-      // Fill in the form with AI-generated data
-      setNewRequest(prev => ({
-        ...prev,
-        title: data.title,
-        description: data.description,
-        bounty: data.suggestedBounty.toString(),
-        category: data.category,
-        deadline: data.deadline
-      }));
-
-      toast.success('✨ AI generated your bounty template!', { duration: 3000 });
+      setRequests((data || []) as Request[]);
     } catch (error) {
-      console.error('Error generating bounty:', error);
-      toast.error('Failed to generate bounty template. Try again.');
+      console.error('Error fetching requests:', error);
     } finally {
-      setIsGeneratingBounty(false);
+      setLoadingRequests(false);
+    }
+  };
+
+  const fetchMyRequests = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('requests')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setMyRequests((data || []) as Request[]);
+    } catch (error) {
+      console.error('Error fetching my requests:', error);
     }
   };
 
   const handleCreateRequest = async () => {
-    if (newRequest.title && newRequest.description && newRequest.bounty) {
-      const bountyAmount = parseInt(newRequest.bounty);
-      
-      try {
-        // Call edge function to process payment and create bounty
-        const { data, error } = await supabase.functions.invoke('create-bounty-with-payment', {
-          body: {
-            title: newRequest.title,
-            description: newRequest.description,
-            bounty: bountyAmount,
-            category: newRequest.category,
-            deadline: `${newRequest.deadline} days`,
-            allow_contributions: newRequest.allowContributions,
-            minimum_contribution: parseFloat(newRequest.minimumContribution) || 0,
-            is_anonymous: false
-          }
-        });
+    if (!newRequest.title || !newRequest.description || !newRequest.bounty) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
 
-        if (error) throw error;
-        if (data.error) throw new Error(data.error);
+    const bountyAmount = parseFloat(newRequest.bounty);
+    if (isNaN(bountyAmount) || bountyAmount <= 0) {
+      toast.error('Please enter a valid bounty amount');
+      return;
+    }
 
-        toast.success(`✨ Bounty posted! Payment of $${bountyAmount} processed from your wallet`, { 
-          duration: 4000 
-        });
-        
-        setShowCreateModal(false);
-        setNewRequest({ 
-          title: '', 
-          description: '', 
-          bounty: '', 
-          category: 'Photography', 
-          deadline: '3', 
-          allowContributions: true, 
-          minimumContribution: '0' 
-        });
-
-        // Refresh the page to show new bounty
-        window.location.reload();
-        
-      } catch (error: any) {
-        console.error('Error creating bounty:', error);
-        const errorMsg = error.message || 'Failed to create bounty';
-        
-        if (errorMsg.includes('Insufficient balance')) {
-          toast.error(
-            `${errorMsg}. Please deposit funds to your wallet first.`,
-            { duration: 5000 }
-          );
-          // Optionally navigate to wallet page
-          setTimeout(() => navigate('/wallet'), 2000);
-        } else if (errorMsg.includes('Wallet not found')) {
-          toast.error('Please deposit funds to your wallet first', { duration: 4000 });
-          setTimeout(() => navigate('/wallet'), 2000);
-        } else {
-          toast.error(errorMsg, { duration: 4000 });
+    try {
+      const { data, error } = await supabase.functions.invoke('create-bounty-with-payment', {
+        body: {
+          title: newRequest.title,
+          description: newRequest.description,
+          bounty: bountyAmount,
+          category: newRequest.category,
+          deadline: `${newRequest.deadline} days`,
+          is_anonymous: false
         }
-      }
-    } else {
-      toast.error('Please fill in all required fields', { duration: 3000 });
-    }
-  };
+      });
 
-  const handleAddToPortfolio = () => {
-    if (newPortfolioItem.title && newPortfolioItem.tags) {
-      const item = {
-        id: portfolio.length + 1,
-        title: newPortfolioItem.title,
-        description: newPortfolioItem.description,
-        tags: newPortfolioItem.tags.toLowerCase().split(',').map(tag => tag.trim()),
-        type: newPortfolioItem.type,
-        thumbnail: '📁',
-        autoSubmit: newPortfolioItem.autoSubmit,
-        timesUsed: 0
-      };
-      setPortfolio([item, ...portfolio]);
-      setShowPortfolioModal(false);
-      setNewPortfolioItem({ title: '', description: '', tags: '', type: 'Photography', autoSubmit: true });
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      toast.success(`Bounty posted! Payment of $${bountyAmount} processed`);
+      setShowCreateModal(false);
+      setNewRequest({ title: '', description: '', bounty: '', category: 'Photography', deadline: '7' });
+      fetchRequests();
+      fetchMyRequests();
+    } catch (error: any) {
+      console.error('Error creating bounty:', error);
+      const errorMsg = error.message || 'Failed to create bounty';
       
-      toast.success('🎨 Added to portfolio! AI will auto-submit to matching requests', { duration: 3000 });
+      if (errorMsg.includes('Insufficient balance') || errorMsg.includes('Wallet not found')) {
+        toast.error('Please deposit funds to your wallet first');
+        setTimeout(() => navigate('/wallet'), 2000);
+      } else {
+        toast.error(errorMsg);
+      }
     }
   };
 
-  const handleInfluencerBounty = (influencer: any) => {
-    setNewRequest({
-      title: `${influencer.category} Content by ${influencer.name}`,
-      description: `Looking for premium ${influencer.category.toLowerCase()} content from ${influencer.name} (${influencer.handle}). ${influencer.followers} followers on ${influencer.platform}.`,
-      bounty: influencer.suggestedBounty.toString(),
-      category: influencer.category.split(' ')[0],
-      deadline: '7',
-      allowContributions: true,
-      minimumContribution: '0'
-    });
-    setActiveTab('browse');
-    setShowCreateModal(true);
-  };
+  const filteredRequests = requests.filter(request => {
+    const matchesSearch = 
+      request.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.description.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = 
+      selectedCategory === 'All' || request.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-space flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-space">
-      {/* Bounty Ticker */}
-      <BountyTicker bounties={requests.map(r => ({ id: r.id, title: r.title, bounty: r.bounty }))} />
-
-      {/* Floating Rank Badge */}
-      {user && spending && (
-        <button
-          onClick={() => setShowStatusModal(true)}
-          className="fixed top-4 right-4 z-50 group animate-fade-in"
-        >
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-neon rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity shadow-neon" />
-            <div className="relative bg-card/90 backdrop-blur-xl px-6 py-3 rounded-2xl border-2 border-neon-pink shadow-neon hover:scale-105 transition-transform">
-              <div className="flex items-center gap-3">
-                <Trophy className="w-6 h-6 text-neon-yellow" />
-                <div className="text-left">
-                  <div className="text-xs text-neon-yellow font-bold uppercase tracking-wider">
-                    {spending.current_tier}
-                  </div>
-                  <div className="text-2xl font-black text-foreground">
-                    ${spending.points}
-                  </div>
-                </div>
-                <StatusBadge 
-                  tier={spending.current_tier} 
-                  title={spending.title}
-                  showTitle={false}
-                />
-              </div>
-            </div>
-          </div>
-        </button>
-      )}
-
-      {/* Compact Header */}
-      <header className="bg-card/40 backdrop-blur-xl border-b border-neon-pink/30 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3">
+      {/* Header */}
+      <header className="bg-card/40 backdrop-blur-xl border-b border-border sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-3">
               <UserAvatar ethnicity="mixed" size="md" />
-              <div className="relative">
-                <div className="bg-gradient-neon p-1.5 sm:p-2 rounded-xl shadow-neon">
-                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <Sparkles className="w-3 h-3 text-neon-yellow absolute -top-1 -right-1 animate-pulse" />
-              </div>
-              <h1 className="text-lg sm:text-xl font-black bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-cyan bg-clip-text text-transparent">
+              <h1 className="text-xl font-black bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
                 Glazn
               </h1>
             </div>
             
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-2">
               <NotificationBell />
-              <button
-                onClick={() => navigate('/feed')}
-                className="bg-gradient-neon text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+              <Button
+                onClick={() => navigate('/wallet')}
+                variant="outline"
+                className="flex items-center gap-2"
               >
-                <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">FEED</span>
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="hidden md:flex bg-card/60 hover:bg-card/80 text-foreground px-4 py-2 rounded-xl font-bold transition-all items-center gap-2 border-2 border-neon-purple/40"
-              >
-                <Users className="w-4 h-4" />
-                COMMUNITY
-              </button>
-              <button
-                onClick={() => navigate('/how-to')}
-                className="bg-card/60 hover:bg-card/80 text-foreground px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold transition-all flex items-center gap-1 border-2 border-neon-cyan/40 text-xs sm:text-sm"
-              >
-                <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">HOW TO</span>
-              </button>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-neon text-white px-2 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold shadow-neon hover:shadow-glow transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
-              >
-                <Crown className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">POST</span>
-                <span className="hidden sm:inline"> BOUNTY</span>
-              </button>
+                <Wallet className="w-4 h-4" />
+                Wallet
+              </Button>
               <Button
                 onClick={async () => {
                   await signOut();
@@ -531,936 +206,290 @@ export default function Glazn() {
                 }}
                 variant="outline"
                 size="icon"
-                className="border-neon-cyan/40 hover:bg-neon-cyan/10 hover:shadow-cyan w-8 h-8 sm:w-10 sm:h-10"
               >
-                <LogOut className="w-3 h-3 sm:w-4 sm:h-4 text-neon-cyan" />
+                <LogOut className="w-4 h-4" />
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Hero Stats Bar */}
-      <div className="bg-gradient-cyber py-3 sm:py-4 shadow-neon border-b border-neon-cyan/30">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4">
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
-            <div className="bg-card/40 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-neon-pink/40">
-              <div className="text-lg sm:text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-0.5 sm:mb-1">
-                ${requests.reduce((sum, r) => sum + r.bounty, 0).toLocaleString()}
-              </div>
-              <div className="text-[0.6rem] sm:text-xs font-bold text-neon-yellow uppercase tracking-wider">Total Bounties</div>
-            </div>
-            <div className="bg-card/40 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-neon-purple/40">
-              <div className="text-lg sm:text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-0.5 sm:mb-1">
-                {filteredRequests.length}
-              </div>
-              <div className="text-[0.6rem] sm:text-xs font-bold text-neon-cyan uppercase tracking-wider">Active</div>
-            </div>
-            <div className="bg-card/40 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-neon-cyan/40">
-              <div className="text-lg sm:text-3xl font-black text-transparent bg-gradient-neon bg-clip-text mb-0.5 sm:mb-1">
-                {portfolio.reduce((sum, p) => sum + p.timesUsed, 0)}
-              </div>
-              <div className="text-[0.6rem] sm:text-xs font-bold text-neon-pink uppercase tracking-wider">Matches</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
-        {/* Simplified Tabs */}
-        <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3 mb-4 sm:mb-6">
-          <button
-            onClick={() => setActiveTab('browse')}
-            className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 font-bold rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm ${
-              activeTab === 'browse'
-                ? 'bg-gradient-neon text-white shadow-neon border-2 border-neon-pink'
-                : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
-            }`}
-          >
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
-              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-[0.65rem] sm:text-sm">BOUNTIES ({filteredRequests.length})</span>
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab('influencers')}
-            className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 font-bold rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm ${
-              activeTab === 'influencers'
-                ? 'bg-gradient-to-r from-neon-yellow to-neon-cyan text-space-dark shadow-cyan border-2 border-neon-cyan'
-                : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
-            }`}
-          >
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
-              <Crown className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-[0.65rem] sm:text-sm">INFLUENCERS</span>
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab('creator')}
-            className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 font-bold rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm ${
-              activeTab === 'creator'
-                ? 'bg-gradient-to-r from-neon-cyan to-neon-purple text-white shadow-cyan border-2 border-neon-cyan'
-                : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
-            }`}
-          >
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
-              <Star className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-[0.65rem] sm:text-sm">REQUESTS</span>
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab('portfolio')}
-            className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 font-bold rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm ${
-              activeTab === 'portfolio'
-                ? 'bg-gradient-to-r from-neon-purple to-neon-pink text-white shadow-glow border-2 border-neon-purple'
-                : 'bg-card/40 text-muted-foreground hover:bg-card/60 border-2 border-border'
-            }`}
-          >
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-[0.65rem] sm:text-sm">CONTENT ({portfolio.filter(p => p.autoSubmit).length})</span>
-            </div>
-          </button>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="flex items-center justify-between">
+            <TabsList>
+              <TabsTrigger value="browse">Browse Bounties</TabsTrigger>
+              <TabsTrigger value="my-requests">My Requests</TabsTrigger>
+            </TabsList>
 
-        {/* Minimal Search */}
-        {activeTab === 'browse' && (
-          <>
-            {/* Quick Stats Dashboard */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
-              <QuickStatsCard
-                title="Active Bounties"
-                value={filteredRequests.length}
-                change="+12% this week"
-                icon="target"
-                trend="up"
-              />
-              <QuickStatsCard
-                title="Total Volume"
-                value={`$${requests.reduce((sum, r) => sum + r.bounty, 0).toLocaleString()}`}
-                change="+8% this week"
-                icon="dollar"
-                trend="up"
-              />
-              <QuickStatsCard
-                title="Creators Online"
-                value="2,847"
-                change="+24% today"
-                icon="trending"
-                trend="up"
-              />
-              <QuickStatsCard
-                title="Avg Response"
-                value="< 2h"
-                change="Fastest ever"
-                icon="award"
-                trend="up"
-              />
-            </div>
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Post Bounty
+            </Button>
+          </div>
 
-            <div className="mb-6">
-              <div className="relative">
-                <Search className="w-5 h-5 text-neon-cyan absolute left-4 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search bounties in the cosmos..."
+          {/* Browse Bounties Tab */}
+          <TabsContent value="browse" className="space-y-4">
+            {/* Filters */}
+            <div className="flex gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search bounties..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-card/60 backdrop-blur-sm border-2 border-neon-purple/40 rounded-xl text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-neon-pink focus:border-neon-pink"
+                  className="pl-10"
                 />
               </div>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </>
-        )}
 
-        {/* Influencers Tab */}
-        {activeTab === 'influencers' && (
-          <InfluencerBounties onCreateBounty={handleInfluencerBounty} />
-        )}
-
-        {/* Content Creator Tab */}
-        {activeTab === 'creator' && (
-          <ContentCreatorDashboard />
-        )}
-
-        {/* Portfolio View - Simplified */}
-        {activeTab === 'portfolio' && (
-          <>
-            <div className="bg-gradient-to-r from-green-500/20 to-emerald-600/20 border-2 border-green-400/30 rounded-2xl p-6 mb-6 backdrop-blur-sm">
-              <div className="flex items-start gap-4">
-                <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-3 rounded-xl">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-black text-xl text-white mb-2">AI Auto-Submit Portfolio</h3>
-                  <p className="text-sm text-white/80 mb-4">
-                    Upload once, earn forever! AI automatically matches your content to new bounties.
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => setShowPortfolioModal(true)}
-                      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all"
-                    >
-                      + UPLOAD CONTENT
-                    </button>
-                    <div className="text-sm text-white/90 font-bold">
-                      {portfolio.filter(p => p.autoSubmit).length} Active • 
-                      <span className="text-green-400 ml-1">{portfolio.reduce((sum, p) => sum + p.timesUsed, 0)} Matches</span>
-                    </div>
-                  </div>
-                </div>
+            {/* Bounties Grid */}
+            {loadingRequests ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent mx-auto" />
               </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {portfolio.map((item) => {
-                const matchingRequests = requests.filter(r => 
-                  r.aiMatched && r.aiMatched.includes(item.id)
-                );
-
-                return (
-                  <div key={item.id} className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 hover:border-green-400/50 transition-all p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="text-4xl">{item.thumbnail}</div>
-                      <span className="flex items-center gap-1 text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded-full border border-green-400/30 font-bold">
-                        <CheckCircle className="w-3 h-3" />
-                        AUTO-ON
-                      </span>
-                    </div>
-                    
-                    <h3 className="font-bold text-lg mb-2 text-white">{item.title}</h3>
-                    <p className="text-sm text-white/70 mb-3 line-clamp-2">{item.description}</p>
-                    
-                    {matchingRequests.length > 0 && (
-                      <div className="mb-3 p-2 bg-green-500/20 border border-green-400/30 rounded-lg">
-                        <div className="flex items-center gap-1 text-xs text-green-400 font-bold">
-                          <Target className="w-3 h-3" />
-                          MATCHED TO {matchingRequests.length} BOUNTY{matchingRequests.length > 1 ? 'S' : ''}
+            ) : filteredRequests.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <p className="text-muted-foreground">No bounties found</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {filteredRequests.map(request => (
+                  <Card key={request.id} className="hover:border-primary/50 transition-colors">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg mb-2">{request.title}</CardTitle>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {request.description}
+                          </p>
                         </div>
                       </div>
-                    )}
-
-                    <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                      <div className="flex items-center gap-1 text-sm text-white/80 font-bold">
-                        <Award className="w-4 h-4 text-yellow-400" />
-                        Used {item.timesUsed}x
-                      </div>
-                      <button className="text-sm text-green-400 hover:text-green-300 font-bold">
-                        EDIT
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-
-        {/* Bounty Cards with Sidebar Layout */}
-        {activeTab === 'browse' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-            {/* Left Sidebar - Trending & Activity */}
-            <div className="lg:col-span-1 space-y-4 sm:space-y-6 order-last lg:order-first">
-              <TrendingBountiesSection />
-              <LiveActivityFeed />
-            </div>
-
-            {/* Main Content - Bounty Cards */}
-            <div className="lg:col-span-1 space-y-3 sm:space-y-4">
-              {filteredRequests.map((request) => {
-                const matchedItems = getMatchedPortfolioItems(request);
-                const bestMatch = matchedItems[0];
-
-                return (
-                  <div key={request.id} className="group relative animate-fade-in">
-                    {/* Glow Effect */}
-                    <div className="absolute -inset-1 bg-gradient-neon rounded-2xl blur-lg opacity-25 group-hover:opacity-100 transition-opacity" />
-                  
-                  <div className="relative bg-card/80 backdrop-blur-xl rounded-2xl border-2 border-neon-pink/40 hover:border-neon-cyan transition-all overflow-hidden shadow-neon">
-                    {/* AI Match Badge */}
-                    {bestMatch && aiEnabled && (
-                      <div className="absolute top-0 right-0 bg-gradient-to-br from-neon-cyan to-neon-purple text-white px-3 py-1 rounded-bl-xl text-xs font-bold flex items-center gap-1 shadow-cyan">
-                        <Zap className="w-3 h-3" />
-                        {bestMatch.matchScore}% MATCH
-                      </div>
-                    )}
-
-                    <div className="p-5">
-                      {/* Communal Bounty Card */}
-                      <div className="mb-4">
-                        <CommunalBountyCard 
-                          requestId={request.id.toString()}
-                          baseBounty={request.bounty}
-                          allowContributions={true}
-                          minimumContribution={0}
-                          showContributors={true}
-                        />
-                      </div>
-
-                      {/* Category Badge */}
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-bold px-2 py-1 bg-neon-cyan/20 text-neon-cyan rounded-lg border border-neon-cyan/30 uppercase">
-                          {request.category}
-                        </span>
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
-                          <Clock className="w-3 h-3" />
-                          {request.deadline}
-                        </span>
-                      </div>
-                      
-                      <h3 className="font-bold text-lg mb-2 text-foreground">{request.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{request.description}</p>
-                      
-                      {/* Your Payout */}
-                      <div className="mb-4 p-3 bg-gradient-to-r from-neon-purple/20 to-neon-pink/20 border-2 border-neon-purple/40 rounded-xl">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-neon-purple font-bold uppercase">You Get:</span>
-                          <span className="text-2xl font-black text-transparent bg-gradient-neon bg-clip-text">${calculateCreatorPayout(request.bounty)}</span>
-                        </div>
-                      </div>
-
-                      {/* Counter-Offer Indicator for Requesters */}
-                      {request.requester === 'You' && request.counter_offer_status === 'pending' && request.counter_offer_amount && (
-                        <div className="mb-4 p-4 bg-neon-yellow/10 border-2 border-neon-yellow/40 rounded-xl animate-pulse">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <TrendingUp className="w-5 h-5 text-neon-yellow" />
-                              <span className="text-sm font-bold text-neon-yellow uppercase">Counter-Offer Received</span>
-                            </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="w-4 h-4 text-primary" />
+                            <span className="font-bold text-foreground">${request.bounty}</span>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-xs text-muted-foreground">Creator proposes</p>
-                              <p className="text-2xl font-black text-neon-yellow">${request.counter_offer_amount.toLocaleString()}</p>
-                            </div>
-                            <Button
-                              onClick={() => setCounterOfferResponse({
-                                requestId: request.id.toString(),
-                                requestTitle: request.title,
-                                originalBounty: request.bounty,
-                                counterOfferAmount: request.counter_offer_amount!
-                              })}
-                              className="bg-gradient-to-r from-neon-yellow to-neon-pink text-white font-bold shadow-neon hover:shadow-glow"
-                            >
-                              Review Offer
-                            </Button>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            <span>{request.deadline}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <User className="w-4 h-4" />
+                            <span>{request.is_anonymous ? 'Anonymous' : 'Requester'}</span>
                           </div>
                         </div>
-                      )}
-                      {request.requester === 'You' && request.counter_offer_status === 'accepted' && (
-                        <div className="mb-4 p-3 bg-green-500/10 border-2 border-green-500/40 rounded-xl">
-                          <div className="flex items-center gap-2 mb-1">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            <span className="text-xs font-bold text-green-500 uppercase">Counter-Offer Accepted</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground">New bounty: <span className="font-black text-green-500">${request.counter_offer_amount?.toLocaleString()}</span></p>
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="flex gap-2">
-                      {request.requester === 'You' && (
-                          <>
-                            <button
-                              onClick={() => setShowSubmissionsManagement({ id: request.id, title: request.title, userId: user?.id || '' })}
-                              className="flex-1 bg-card/60 hover:bg-card/80 text-foreground px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 border-2 border-neon-purple/40"
-                            >
-                              <FileCheck className="w-4 h-4" />
-                              REVIEW
-                            </button>
-                            <button
-                              onClick={() => setManageContributions({ id: request.id, title: request.title })}
-                              className="bg-card/60 hover:bg-card/80 text-foreground px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 border-2 border-neon-yellow/40"
-                            >
-                              <DollarSign className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => setShareableBounty({ id: request.id, title: request.title })}
-                              className="bg-gradient-to-r from-neon-cyan to-neon-purple hover:from-neon-purple hover:to-neon-cyan text-white px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-cyan"
-                            >
-                              <LinkIcon className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
-                        {request.requester !== 'You' && (
-                          <>
-                            <button
-                              onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
-                              className="flex-1 bg-gradient-neon hover:shadow-glow text-white px-4 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 shadow-neon"
-                            >
-                              <LinkIcon className="w-4 h-4" />
-                              SUBMIT
-                            </button>
-                            <button
-                              onClick={() => setContributeToBounty({ 
-                                id: request.id, 
-                                title: request.title, 
-                                bounty: request.bounty,
-                                minimumContribution: 0
-                              })}
-                              className="bg-gradient-to-r from-neon-yellow to-neon-pink hover:shadow-glow text-white px-4 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 shadow-neon"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
+                        <Button
+                          onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
+                          size="sm"
+                        >
+                          Submit
+                        </Button>
                       </div>
-
-                      {/* Bounty Reactions */}
-                      <div className="mt-4 pt-4 border-t border-neon-purple/20">
-                        <BountyReactions requestId={request.id.toString()} />
-                      </div>
-
-                      {/* Contributors List */}
-                      <div className="mt-4 pt-4 border-t border-neon-purple/20">
-                        <ContributorsList 
-                          requestId={request.id.toString()}
-                          showPending={request.requester === 'You'}
-                          maxDisplay={3}
-                        />
-                      </div>
-
-                      {/* Submissions Count */}
-                      <div className="mt-3 text-center text-xs text-muted-foreground">
-                        {request.submissions} cosmic submissions
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {filteredRequests.length === 0 && (
-              <div className="col-span-full text-center py-12">
-                <Search className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
-                <h3 className="text-xl font-bold text-foreground mb-2">No bounties in this sector</h3>
-                <p className="text-muted-foreground">Try searching another quadrant of the cosmos</p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
-          </div>
 
-          {/* Right Sidebar - Leaderboard */}
-          <div className="lg:col-span-1">
-            <LeaderboardPanel />
-          </div>
-        </div>
-      )}
+            {/* Top Creators Sidebar */}
+            <div className="mt-8">
+              <TopCreatorsPanel />
+            </div>
+          </TabsContent>
+
+          {/* My Requests Tab */}
+          <TabsContent value="my-requests" className="space-y-4">
+            {myRequests.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <p className="text-muted-foreground mb-4">You haven't posted any bounties yet</p>
+                  <Button onClick={() => setShowCreateModal(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Post Your First Bounty
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {myRequests.map(request => (
+                  <Card key={request.id}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg mb-2">{request.title}</CardTitle>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {request.description}
+                          </p>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          request.status === 'open' ? 'bg-green-500/20 text-green-500' : 'bg-gray-500/20 text-gray-500'
+                        }`}>
+                          {request.status}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="w-4 h-4 text-primary" />
+                            <span className="font-bold text-foreground">${request.bounty}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            <span>{request.deadline}</span>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => setShowSubmissionsManagement({ 
+                            id: request.id, 
+                            title: request.title,
+                            userId: request.user_id 
+                          })}
+                          size="sm"
+                          variant="outline"
+                        >
+                          Manage Submissions
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Content Collection */}
+            {user && (
+              <div className="mt-8">
+                <ContentCollection />
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* Portfolio Upload Modal */}
-      {showPortfolioModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-pink-50">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-lg">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">Add to AI Portfolio</h2>
-              </div>
-              <p className="text-sm text-gray-600">Upload content that can be automatically submitted to matching requests</p>
-            </div>
-            
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Content Title</label>
-                <input
-                  type="text"
-                  value={newPortfolioItem.title}
-                  onChange={(e) => setNewPortfolioItem({ ...newPortfolioItem, title: e.target.value })}
-                  placeholder="e.g., Golden Hour Beach Collection"
-                  className="w-full px-4 py-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Content Type</label>
-                <select
-                  value={newPortfolioItem.type}
-                  onChange={(e) => setNewPortfolioItem({ ...newPortfolioItem, type: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  {categories.filter(c => c !== 'All').map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea
-                  value={newPortfolioItem.description}
-                  onChange={(e) => setNewPortfolioItem({ ...newPortfolioItem, description: e.target.value })}
-                  placeholder="Describe this content..."
-                  rows={3}
-                  className="w-full px-4 py-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tags (comma-separated)</label>
-                <input
-                  type="text"
-                  value={newPortfolioItem.tags}
-                  onChange={(e) => setNewPortfolioItem({ ...newPortfolioItem, tags: e.target.value })}
-                  placeholder="beach, sunset, golden hour, ocean, waves"
-                  className="w-full px-4 py-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-                <p className="text-xs text-gray-500 mt-1">AI uses these tags to match your content with requests</p>
-              </div>
-
-              <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
-                <input
-                  type="checkbox"
-                  id="autoSubmit"
-                  checked={newPortfolioItem.autoSubmit}
-                  onChange={(e) => setNewPortfolioItem({ ...newPortfolioItem, autoSubmit: e.target.checked })}
-                  className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                />
-                <label htmlFor="autoSubmit" className="text-sm text-gray-700 cursor-pointer">
-                  <strong>Enable AI Auto-Submit</strong> - Automatically submit this content to matching requests
-                </label>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-purple-100 flex gap-3 bg-gray-50">
-              <button
-                onClick={() => setShowPortfolioModal(false)}
-                className="flex-1 px-6 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-white transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddToPortfolio}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
-              >
-                <Sparkles className="w-4 h-4" />
-                Add to Portfolio
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* AI Settings Modal */}
-      {showAISettings && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
-            <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-pink-50">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">AI Auto-Submit Settings</h2>
-              <p className="text-sm text-gray-600">Control how AI submits your portfolio content</p>
-            </div>
-            
-            <div className="p-6 space-y-6">
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <Sparkles className={`w-6 h-6 ${aiEnabled ? 'text-green-600' : 'text-gray-400'}`} />
-                  <div>
-                    <div className="font-semibold text-gray-900">AI Auto-Submit</div>
-                    <div className="text-sm text-gray-600">Automatically submit matching portfolio items</div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    setAiEnabled(!aiEnabled);
-                    toast.success(
-                      !aiEnabled ? '✨ AI Auto-Submit Enabled!' : '⏸️ AI Auto-Submit Paused',
-                      { duration: 2000 }
-                    );
-                  }}
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
-                    aiEnabled ? 'bg-green-600' : 'bg-gray-300'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                      aiEnabled ? 'translate-x-7' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="font-semibold text-gray-900">How AI Matching Works:</h3>
-                <div className="space-y-2 text-sm text-gray-600">
-                  <div className="flex gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                    <p>AI scans new requests and calculates match scores with your portfolio</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                    <p>Items with 30%+ match are automatically submitted</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                    <p>You earn {(1-COMMISSION_RATE)*100}% of the bounty if selected</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                    <p>Same content can win multiple requests over time</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex gap-2">
-                  <TrendingUp className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <div className="text-sm text-blue-900">
-                    <strong>Pro Tip:</strong> Add detailed, specific tags to your portfolio items for better AI matching accuracy and higher match scores!
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-purple-100 bg-gray-50">
-              <button
-                onClick={() => setShowAISettings(false)}
-                className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:shadow-lg transition-all"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Request Modal - Exciting */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gradient-to-br from-purple-900 to-pink-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-yellow-400">
-            <div className="p-6 border-b border-yellow-400/30 bg-gradient-to-r from-yellow-400/20 to-orange-500/20">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-3 rounded-xl shadow-lg">
-                  <Crown className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-black text-white">POST YOUR BOUNTY</h2>
-                  <p className="text-sm text-yellow-400 font-bold">AI instantly matches with creators!</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-white mb-2">What Do You Need?</label>
-                <input
-                  type="text"
-                  value={newRequest.title}
-                  onChange={(e) => setNewRequest({ ...newRequest, title: e.target.value })}
-                  placeholder="e.g., Sunset Beach Photography"
-                  className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-                />
-              </div>
-
-              {/* HUGE Bounty Input */}
-              <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border-2 border-yellow-400/30 rounded-2xl p-6">
-                <label className="block text-center text-sm font-black text-yellow-400 mb-3 uppercase tracking-widest">
-                  💰 SET YOUR BOUNTY 💰
-                </label>
-                <div className="relative">
-                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-black text-white">$</span>
-                  <input
-                    type="number"
-                    value={newRequest.bounty}
-                    onChange={(e) => setNewRequest({ ...newRequest, bounty: e.target.value })}
-                    placeholder="500"
-                    className="w-full pl-16 pr-6 py-6 bg-black/30 border-2 border-yellow-400 rounded-xl text-5xl font-black text-center text-white placeholder-white/30 focus:ring-4 focus:ring-yellow-400/50 focus:border-yellow-400"
-                  />
-                </div>
-                {newRequest.bounty && (
-                  <div className="mt-4 p-3 bg-black/30 rounded-lg">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/70 font-medium">Creator gets:</span>
-                      <span className="text-2xl font-black text-green-400">
-                        ${calculateCreatorPayout(parseInt(newRequest.bounty))}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs mt-1">
-                      <span className="text-white/50">Platform fee (20%):</span>
-                      <span className="text-white/70 font-bold">
-                        ${calculateCommission(parseInt(newRequest.bounty))}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold text-white mb-2">Category</label>
-                  <select
-                    value={newRequest.category}
-                    onChange={(e) => setNewRequest({ ...newRequest, category: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-                  >
-                    {categories.filter(c => c !== 'All').map(cat => (
-                      <option key={cat} value={cat} className="bg-purple-900">{cat}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-white mb-2">Deadline</label>
-                  <input
-                    type="number"
-                    value={newRequest.deadline}
-                    onChange={(e) => setNewRequest({ ...newRequest, deadline: e.target.value })}
-                    placeholder="3"
-                    className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-                  />
-                  <p className="text-xs text-white/50 mt-1">days</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-white mb-2">Detailed Description</label>
-                <textarea
-                  value={newRequest.description}
-                  onChange={(e) => setNewRequest({ ...newRequest, description: e.target.value })}
-                  placeholder="Be specific! Better details = better AI matches..."
-                  rows={4}
-                  className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 resize-none"
-                />
-                <Button
-                  onClick={handleGenerateAIBounty}
-                  disabled={!newRequest.description || isGeneratingBounty}
-                  className="mt-2 bg-gradient-neon hover:shadow-glow text-white font-bold"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  {isGeneratingBounty ? 'Generating...' : '✨ Generate with AI'}
-                </Button>
-              </div>
-
-              <div className="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4">
-                <div className="flex gap-2">
-                  <Sparkles className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                  <div className="text-sm text-blue-400">
-                    <strong className="text-white">AI is standing by!</strong> Once posted, your request will be instantly matched with creator portfolios. You'll get submissions within minutes!
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-neon-yellow/20 to-neon-pink/20 border-2 border-neon-yellow/30 rounded-xl">
-                <input
-                  type="checkbox"
-                  id="allowContributions"
-                  checked={newRequest.allowContributions}
-                  onChange={(e) => setNewRequest({ ...newRequest, allowContributions: e.target.checked })}
-                  className="w-5 h-5 text-neon-pink border-neon-yellow/30 rounded focus:ring-neon-yellow"
-                />
-                <label htmlFor="allowContributions" className="text-sm text-white cursor-pointer font-medium">
-                  <strong className="text-neon-yellow">Allow others to contribute to this bounty</strong>
-                  <p className="text-xs text-white/70 mt-1">Contributors can add funds but you maintain full control over accepting submissions</p>
-                </label>
-              </div>
-
-              {newRequest.allowContributions && (
-                <div>
-                  <label className="block text-sm font-bold text-white mb-2">
-                    Minimum Contribution (Optional)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-white">$</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={newRequest.minimumContribution}
-                      onChange={(e) => setNewRequest({ ...newRequest, minimumContribution: e.target.value })}
-                      placeholder="0"
-                      className="w-full pl-10 pr-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-neon-yellow focus:border-neon-yellow"
-                    />
-                  </div>
-                  <p className="text-xs text-white/50 mt-1">
-                    Set a minimum amount contributors must pledge to access submissions (leave 0 for no minimum)
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="p-6 border-t border-yellow-400/30 flex gap-3 bg-black/30">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="flex-1 px-6 py-4 border-2 border-white/20 rounded-xl font-bold text-white hover:bg-white/10 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateRequest}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black rounded-xl font-black hover:shadow-[0_0_40px_rgba(251,191,36,0.6)] transition-all flex items-center justify-center gap-2 text-lg"
-              >
-                <Crown className="w-5 h-5" />
-                POST BOUNTY
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* External Submission Modal */}
-      {showExternalSubmission && (
-        <ExternalSubmissionModal
-          requestId={showExternalSubmission.id.toString()}
-          requestTitle={showExternalSubmission.title}
-          onClose={() => setShowExternalSubmission(null)}
-          onSubmit={() => {
-            toast.success('Submission sent for review!');
-          }}
-        />
-      )}
-
-      {/* Submissions Management Modal */}
-      {showSubmissionsManagement && (
-        <SubmissionsManagementModal
-          requestId={showSubmissionsManagement.id.toString()}
-          requestTitle={showSubmissionsManagement.title}
-          requestOwnerId={showSubmissionsManagement.userId}
-          onClose={() => setShowSubmissionsManagement(null)}
-        />
-      )}
-
-      {/* Status Modal */}
-      <Dialog open={showStatusModal} onOpenChange={setShowStatusModal}>
-        <DialogContent className="max-w-md">
+      {/* Create Bounty Modal */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-2xl">
-              <Trophy className="w-6 h-6 text-primary" />
-              Your Status & Rewards
-            </DialogTitle>
+            <DialogTitle>Post a New Bounty</DialogTitle>
             <DialogDescription>
-              Track your spending and unlock exclusive titles
+              Create a request for content. Funds will be held in escrow until you approve a submission.
             </DialogDescription>
           </DialogHeader>
 
-          {spending && (
-            <div className="space-y-6 pt-4">
-              {/* Current Status */}
-              <div className="flex flex-col items-center gap-4 p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-                <StatusBadge 
-                  tier={spending.current_tier} 
-                  title={spending.title}
-                  className="scale-125"
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Title</label>
+              <Input
+                placeholder="E.g., Sunset Beach Photography"
+                value={newRequest.title}
+                onChange={(e) => setNewRequest({ ...newRequest, title: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Description</label>
+              <Textarea
+                placeholder="Describe what you're looking for..."
+                value={newRequest.description}
+                onChange={(e) => setNewRequest({ ...newRequest, description: e.target.value })}
+                rows={4}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Category</label>
+                <Select value={newRequest.category} onValueChange={(value) => setNewRequest({ ...newRequest, category: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.filter(c => c !== 'All').map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Bounty Amount ($)</label>
+                <Input
+                  type="number"
+                  placeholder="100"
+                  value={newRequest.bounty}
+                  onChange={(e) => setNewRequest({ ...newRequest, bounty: e.target.value })}
                 />
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-foreground">
-                    {spending.points} Points
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    ${spending.total_spent.toFixed(2)} total spent
-                  </div>
-                </div>
-              </div>
-
-              {/* Progress */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">Level Progress</h3>
-                <StatusProgress 
-                  currentSpending={spending.total_spent}
-                  currentTier={spending.current_tier}
-                />
-              </div>
-
-              {/* All Tiers */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">All Status Tiers</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                    <StatusBadge tier="glass_beginner" title="👟 Glass Beginner" />
-                    <span className="text-muted-foreground">$0+</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                    <StatusBadge tier="glass_collector" title="🎯 Glass Collector" />
-                    <span className="text-muted-foreground">$100+</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                    <StatusBadge tier="glass_enthusiast" title="✨ Glass Enthusiast" />
-                    <span className="text-muted-foreground">$500+</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                    <StatusBadge tier="glass_connoisseur" title="🌟 Glass Connoisseur" />
-                    <span className="text-muted-foreground">$2,000+</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                    <StatusBadge tier="glass_royalty" title="💎 Glass Royalty" />
-                    <span className="text-muted-foreground">$5,000+</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                    <StatusBadge tier="glass_legend" title="👑 Glass Legend" />
-                    <span className="text-muted-foreground">$10,000+</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Benefits */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">Status Benefits</h3>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Exclusive badges and titles</li>
-                  <li>• Priority in creator matching</li>
-                  <li>• Recognition in the community</li>
-                  <li>• Special perks for top tiers</li>
-                </ul>
               </div>
             </div>
-          )}
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Deadline (days)</label>
+              <Select value={newRequest.deadline} onValueChange={(value) => setNewRequest({ ...newRequest, deadline: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 days</SelectItem>
+                  <SelectItem value="7">7 days</SelectItem>
+                  <SelectItem value="14">14 days</SelectItem>
+                  <SelectItem value="30">30 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button onClick={handleCreateRequest} className="flex-1">
+                Post Bounty
+              </Button>
+              <Button onClick={() => setShowCreateModal(false)} variant="outline">
+                Cancel
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
-      {/* Shareable Bounty Link Modal */}
-      {shareableBounty && (
-        <ShareableBountyLink
-          bountyId={shareableBounty.id}
-          bountyTitle={shareableBounty.title}
-          isOpen={!!shareableBounty}
-          onClose={() => setShareableBounty(null)}
-        />
-      )}
-
-      {/* Contribute to Bounty Modal */}
-      {contributeToBounty && (
-        <ContributeToBountyModal
-          isOpen={!!contributeToBounty}
-          onClose={() => setContributeToBounty(null)}
-          requestId={contributeToBounty.id.toString()}
-          requestTitle={contributeToBounty.title}
-          currentBounty={contributeToBounty.bounty}
-          minimumContribution={contributeToBounty.minimumContribution}
-        />
-      )}
-
-      {/* Manage Contributions Modal */}
-      {manageContributions && (
-        <ContributionsManagementModal
-          isOpen={!!manageContributions}
-          onClose={() => setManageContributions(null)}
-          requestId={manageContributions.id.toString()}
-          requestTitle={manageContributions.title}
-        />
-      )}
-
-      {/* Counter-Offer Response Modal */}
-      {counterOfferResponse && (
-        <CounterOfferResponseModal
-          open={!!counterOfferResponse}
-          onOpenChange={(open) => !open && setCounterOfferResponse(null)}
-          requestId={counterOfferResponse.requestId}
-          requestTitle={counterOfferResponse.requestTitle}
-          originalBounty={counterOfferResponse.originalBounty}
-          counterOfferAmount={counterOfferResponse.counterOfferAmount}
-          onSuccess={() => {
-            // Refresh the bounties list after counter-offer response
-            toast.success('Counter-offer response recorded!');
-            setCounterOfferResponse(null);
+      {/* Modals */}
+      {showExternalSubmission && (
+        <ExternalSubmissionModal
+          requestId={showExternalSubmission.id}
+          requestTitle={showExternalSubmission.title}
+          onClose={() => setShowExternalSubmission(null)}
+          onSubmit={() => {
+            toast.success('Submission created successfully!');
+            setShowExternalSubmission(null);
           }}
         />
       )}
 
-      {/* Onboarding Flow */}
-      {showOnboarding && (
-        <OnboardingFlow
-          userType="creator"
-          onComplete={() => setShowOnboarding(false)}
+      {showSubmissionsManagement && (
+        <SubmissionsManagementModal
+          requestId={showSubmissionsManagement.id}
+          requestTitle={showSubmissionsManagement.title}
+          requestOwnerId={showSubmissionsManagement.userId}
+          onClose={() => setShowSubmissionsManagement(null)}
         />
       )}
     </div>

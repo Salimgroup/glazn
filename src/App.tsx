@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
-import Community from "./pages/Community";
 import Auth from "./pages/Auth";
 import HowTo from "./pages/HowTo";
 import Wallet from "./pages/Wallet";
@@ -13,7 +12,6 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
-import BountyFeed from "./pages/BountyFeed";
 import PublicProfile from "./pages/PublicProfile";
 
 const queryClient = new QueryClient();
@@ -26,9 +24,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Community />} />
-            <Route path="/bounties" element={<Index />} />
-            <Route path="/feed" element={<BountyFeed />} />
+            <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/how-to" element={<HowTo />} />
             <Route path="/wallet" element={<Wallet />} />
