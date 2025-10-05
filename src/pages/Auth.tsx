@@ -360,7 +360,7 @@ export default function Auth() {
                 AI-Powered Cosmic Matching
               </p>
               <p className="text-xs text-muted-foreground">
-                Our quantum AI automatically matches your portfolio with relevant bespoke content requests across the galaxy. Upload once, earn forever.
+                Our quantum AI automatically matches your portfolio with relevant bespoke, on-demand content requests across the galaxy. Upload once, earn forever.
               </p>
             </div>
           </div>

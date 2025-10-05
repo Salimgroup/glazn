@@ -24,7 +24,7 @@ export default function HowTo() {
               Welcome to Glazn
             </h1>
             <p className="text-xl text-muted-foreground">
-              The cosmic marketplace for bespoke content creation
+              The cosmic marketplace for bespoke, on-demand content creation
             </p>
           </div>
         </div>
@@ -40,7 +40,7 @@ export default function HowTo() {
               <h2 className="text-2xl font-black text-foreground">What is Glazn?</h2>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              Glazn is a futuristic bounty marketplace where requesters post requests for bespoke content and creators submit custom work. 
+              Glazn is a futuristic bounty marketplace where requesters post requests for bespoke, on-demand content and creators submit custom work tailored to your exact specifications. 
               Our AI automatically matches requests with creator portfolios, making the process seamless and efficient.
             </p>
           </section>
@@ -59,9 +59,9 @@ export default function HowTo() {
                   1
                 </div>
                 <div>
-                  <h3 className="font-bold text-foreground mb-1">Request Bespoke Content</h3>
+                  <h3 className="font-bold text-foreground mb-1">Request Bespoke, On-Demand Content</h3>
                   <p className="text-sm text-muted-foreground">
-                    Describe your custom content needs, set your budget, and deadline. Be specific for better AI matches!
+                    Describe your custom, on-demand content needs, set your budget, and deadline. Be specific for better AI matches!
                   </p>
                 </div>
               </div>
@@ -72,7 +72,7 @@ export default function HowTo() {
                 <div>
                   <h3 className="font-bold text-foreground mb-1">AI Matches Creators</h3>
                   <p className="text-sm text-muted-foreground">
-                    Our AI instantly scans creator portfolios and auto-submits matching bespoke content to your request.
+                    Our AI instantly scans creator portfolios and auto-submits matching bespoke, on-demand content to your request.
                   </p>
                 </div>
               </div>

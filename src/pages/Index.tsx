@@ -187,7 +187,7 @@ export default function Index() {
                 <h1 className="text-xl font-black bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
                   Glazn
                 </h1>
-                <p className="text-[10px] text-muted-foreground -mt-1">Bespoke Content Marketplace</p>
+                <p className="text-[10px] text-muted-foreground -mt-1">Bespoke, On-Demand Content</p>
               </div>
             </div>
             
@@ -325,7 +325,7 @@ export default function Index() {
             {myRequests.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground mb-4">You haven't requested any bespoke content yet</p>
+                  <p className="text-muted-foreground mb-4">You haven't requested any on-demand content yet</p>
                   <Button onClick={() => setShowCreateModal(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Request Your First Content
@@ -395,9 +395,9 @@ export default function Index() {
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Request Bespoke Content</DialogTitle>
+            <DialogTitle>Request Bespoke, On-Demand Content</DialogTitle>
             <DialogDescription>
-              Create a request for bespoke, custom content. Funds will be held in escrow until you approve a submission.
+              Create a request for bespoke, on-demand content tailored to your needs. Funds will be held in escrow until you approve a submission.
             </DialogDescription>
           </DialogHeader>
 
@@ -405,7 +405,7 @@ export default function Index() {
             <div>
               <label className="text-sm font-medium mb-2 block">Title</label>
               <Input
-                placeholder="E.g., Bespoke Sunset Beach Photography"
+                placeholder="E.g., Bespoke Sunset Beach Photography - On-Demand"
                 value={newRequest.title}
                 onChange={(e) => setNewRequest({ ...newRequest, title: e.target.value })}
               />
@@ -414,7 +414,7 @@ export default function Index() {
             <div>
               <label className="text-sm font-medium mb-2 block">Description</label>
               <Textarea
-                placeholder="Describe your bespoke content requirements in detail..."
+                placeholder="Describe your bespoke, on-demand content requirements in detail..."
                 value={newRequest.description}
                 onChange={(e) => setNewRequest({ ...newRequest, description: e.target.value })}
                 rows={4}
