@@ -3,6 +3,7 @@ import { X, ExternalLink, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { ContentSharingModal } from './ContentSharingModal';
 
 interface Submission {
   id: string;
@@ -34,6 +35,8 @@ export function SubmissionsManagementModal({
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [sharingModalOpen, setSharingModalOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
   // SECURITY: Verify current user is the request owner
   useEffect(() => {
@@ -73,38 +76,15 @@ export function SubmissionsManagementModal({
     }
   };
 
-  const handleApprove = async (submissionId: string) => {
+  const handleApprove = (submission: Submission) => {
     // SECURITY: Double-check authorization before approval
     if (currentUserId !== requestOwnerId) {
       toast.error('Unauthorized: You can only approve submissions for your own requests');
       return;
     }
-
-    setActionLoading(submissionId);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      const { error } = await supabase
-        .from('submissions')
-        .update({
-          status: 'approved',
-          reviewed_by: user?.id,
-          reviewed_at: new Date().toISOString()
-        })
-        .eq('id', submissionId);
-
-      if (error) throw error;
-
-      toast.success('Content approved! Creator can now use this as deliverable');
-      loadSubmissions();
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Error approving:', error);
-      }
-      toast.error('Failed to approve submission');
-    } finally {
-      setActionLoading(null);
-    }
+    
+    setSelectedSubmission(submission);
+    setSharingModalOpen(true);
   };
 
   const handleReject = async (submissionId: string) => {
@@ -240,7 +220,7 @@ export function SubmissionsManagementModal({
                   {submission.status === 'pending' && (
                     <div className="flex gap-2 pt-3 border-t border-gray-200">
                       <Button
-                        onClick={() => handleApprove(submission.id)}
+                        onClick={() => handleApprove(submission)}
                         disabled={actionLoading === submission.id}
                         className="flex-1 bg-green-600 hover:bg-green-700"
                         size="sm"
@@ -273,6 +253,25 @@ export function SubmissionsManagementModal({
           )}
         </div>
       </div>
+      
+      {selectedSubmission && (
+        <ContentSharingModal
+          isOpen={sharingModalOpen}
+          onClose={() => {
+            setSharingModalOpen(false);
+            setSelectedSubmission(null);
+          }}
+          submissionId={selectedSubmission.id}
+          requestId={requestId}
+          creatorId={selectedSubmission.creator_id}
+          title={selectedSubmission.title}
+          externalUrl={selectedSubmission.external_url}
+          platformName={selectedSubmission.platform_name}
+          onApprovalComplete={() => {
+            loadSubmissions();
+          }}
+        />
+      )}
     </div>
   );
 }
