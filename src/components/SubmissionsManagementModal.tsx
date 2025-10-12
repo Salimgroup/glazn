@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { X, ExternalLink, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { X, ExternalLink, CheckCircle, XCircle, Clock, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentSharingModal } from './ContentSharingModal';
+import { RatingModal } from './RatingModal';
 
 interface Submission {
   id: string;
@@ -16,6 +17,14 @@ interface Submission {
   created_at: string;
   creator_id: string;
   rejection_reason?: string;
+  profiles?: {
+    display_name: string;
+  };
+  bounty_ratings?: Array<{
+    id: string;
+    rating: number;
+    review_text: string | null;
+  }>;
 }
 
 interface SubmissionsManagementModalProps {
@@ -37,6 +46,8 @@ export function SubmissionsManagementModal({
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [sharingModalOpen, setSharingModalOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [ratingSubmission, setRatingSubmission] = useState<Submission | null>(null);
 
   // SECURITY: Verify current user is the request owner
   useEffect(() => {
@@ -65,7 +76,33 @@ export function SubmissionsManagementModal({
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSubmissions(data || []);
+
+      // Fetch related data separately
+      const submissionsWithData = await Promise.all(
+        (data || []).map(async (submission) => {
+          // Fetch creator profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name')
+            .eq('id', submission.creator_id)
+            .single();
+
+          // Fetch existing rating
+          const { data: ratings } = await supabase
+            .from('bounty_ratings')
+            .select('id, rating, review_text')
+            .eq('request_id', requestId)
+            .eq('requester_id', requestOwnerId);
+
+          return {
+            ...submission,
+            profiles: profile,
+            bounty_ratings: ratings || [],
+          };
+        })
+      );
+
+      setSubmissions(submissionsWithData as any);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error('Error loading submissions:', error);
@@ -247,6 +284,25 @@ export function SubmissionsManagementModal({
                       <p className="text-sm text-red-700">{submission.rejection_reason}</p>
                     </div>
                   )}
+
+                  {submission.status === 'approved' && (
+                    <div className="pt-3 border-t border-gray-200">
+                      <Button
+                        onClick={() => {
+                          setRatingSubmission(submission);
+                          setRatingModalOpen(true);
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                      >
+                        <Star className="w-4 h-4 mr-1" />
+                        {submission.bounty_ratings && submission.bounty_ratings.length > 0
+                          ? 'Update Rating'
+                          : 'Rate Creator'}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -270,6 +326,28 @@ export function SubmissionsManagementModal({
           onApprovalComplete={() => {
             loadSubmissions();
           }}
+        />
+      )}
+
+      {ratingSubmission && (
+        <RatingModal
+          open={ratingModalOpen}
+          onOpenChange={(open) => {
+            setRatingModalOpen(open);
+            if (!open) {
+              setRatingSubmission(null);
+              loadSubmissions();
+            }
+          }}
+          requestId={requestId}
+          creatorId={ratingSubmission.creator_id}
+          requesterId={requestOwnerId}
+          creatorName={ratingSubmission.profiles?.display_name || 'Creator'}
+          existingRating={
+            ratingSubmission.bounty_ratings && ratingSubmission.bounty_ratings.length > 0
+              ? ratingSubmission.bounty_ratings[0]
+              : undefined
+          }
         />
       )}
     </div>

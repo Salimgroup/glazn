@@ -114,6 +114,54 @@ export type Database = {
           },
         ]
       }
+      bounty_ratings: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          id: string
+          rating: number
+          request_id: string
+          requester_id: string
+          review_text: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          rating: number
+          request_id: string
+          requester_id: string
+          review_text?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          rating?: number
+          request_id?: string
+          requester_id?: string
+          review_text?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bounty_ratings_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "content_creator_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bounty_ratings_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bounty_reactions: {
         Row: {
           created_at: string | null

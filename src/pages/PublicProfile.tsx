@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsOwnProfile } from '@/lib/dataPrivacy';
 import { useVerifiedAccounts } from '@/hooks/useVerifiedAccounts';
+import { CreatorRating } from '@/components/CreatorRating';
 
 interface Profile {
   id: string;
@@ -267,37 +268,48 @@ export default function PublicProfile() {
 
         {/* Creator Info */}
         {profile.is_content_creator && (
-          <Card className="p-6 bg-card/80 backdrop-blur-xl border-2 border-neon-cyan/30">
-            <h2 className="text-xl font-black text-foreground mb-4 flex items-center gap-2">
-              <Target className="w-5 h-5 text-neon-cyan" />
-              Creator Profile
-            </h2>
-            
-            {profile.creator_platforms && profile.creator_platforms.length > 0 && (
-              <div className="mb-4">
-                <p className="text-sm text-muted-foreground mb-2">Active on:</p>
-                <div className="flex flex-wrap gap-2">
-                  {profile.creator_platforms.map((platform) => (
-                    <span
-                      key={platform}
-                      className="px-3 py-1 bg-neon-cyan/10 text-neon-cyan text-sm font-bold rounded-full border border-neon-cyan/30"
-                    >
-                      {platform}
-                    </span>
-                  ))}
+          <>
+            <Card className="p-6 bg-card/80 backdrop-blur-xl border-2 border-neon-cyan/30 mb-6">
+              <h2 className="text-xl font-black text-foreground mb-4 flex items-center gap-2">
+                <Target className="w-5 h-5 text-neon-cyan" />
+                Creator Profile
+              </h2>
+              
+              {profile.creator_platforms && profile.creator_platforms.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm text-muted-foreground mb-2">Active on:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {profile.creator_platforms.map((platform) => (
+                      <span
+                        key={platform}
+                        className="px-3 py-1 bg-neon-cyan/10 text-neon-cyan text-sm font-bold rounded-full border border-neon-cyan/30"
+                      >
+                        {platform}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div className="flex gap-3 mt-6">
-              <Link to="/bounties" className="flex-1">
-                <Button className="w-full bg-gradient-neon hover:shadow-glow">
-                  <Award className="w-4 h-4 mr-2" />
-                  View Available Bounties
-                </Button>
-              </Link>
-            </div>
-          </Card>
+              <div className="flex gap-3 mt-6">
+                <Link to="/bounties" className="flex-1">
+                  <Button className="w-full bg-gradient-neon hover:shadow-glow">
+                    <Award className="w-4 h-4 mr-2" />
+                    View Available Bounties
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+
+            {/* Creator Ratings */}
+            <Card className="p-6 bg-card/80 backdrop-blur-xl border-2 border-neon-purple/30">
+              <h2 className="text-xl font-black text-foreground mb-4 flex items-center gap-2">
+                <Award className="w-5 h-5 text-neon-purple" />
+                Creator Ratings & Reviews
+              </h2>
+              <CreatorRating creatorId={profile.id} />
+            </Card>
+          </>
         )}
 
         {/* Back to Home */}
