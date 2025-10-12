@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, LogOut, Wallet, Search, DollarSign, Clock, User } from 'lucide-react';
+import { ShareButton } from '@/components/ShareButton';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -301,12 +302,23 @@ export default function Index() {
                             <span>{request.is_anonymous ? 'Anonymous' : 'Requester'}</span>
                           </div>
                         </div>
-                        <Button
-                          onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
-                          size="sm"
-                        >
-                          Submit
-                        </Button>
+                        <div className="flex gap-2">
+                          <ShareButton
+                            title={request.title}
+                            description={request.description}
+                            price={request.bounty}
+                            url={`/`}
+                            type="bounty"
+                            size="sm"
+                            variant="outline"
+                          />
+                          <Button
+                            onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
+                            size="sm"
+                          >
+                            Submit
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

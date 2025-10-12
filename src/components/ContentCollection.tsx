@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ExternalLink, Eye, Globe, Lock, Trash2 } from "lucide-react";
+import { ShareButton } from "@/components/ShareButton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface ContentPost {
@@ -193,6 +194,14 @@ export const ContentCollection = () => {
                     View
                   </Button>
                 )}
+                <ShareButton
+                  title={post.title}
+                  description={post.description}
+                  url={`/@${post.creator.username}`}
+                  type="content"
+                  size="sm"
+                  variant="outline"
+                />
                 <Button
                   size="sm"
                   variant="outline"

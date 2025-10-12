@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Crown, CheckCircle, MapPin, Link as LinkIcon, Award, Target, ExternalLink } from 'lucide-react';
+import { ShareButton } from '@/components/ShareButton';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/UserAvatar';
@@ -158,17 +159,27 @@ export default function PublicProfile() {
             </div>
             
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-black bg-gradient-neon bg-clip-text text-transparent">
-                  {profile.display_name}
-                </h1>
-                {userStatus && (
-                  <StatusBadge 
-                    tier={userStatus.creator_tier as any}
-                    title={userStatus.creator_tier.replace('glass_', '').replace('_', ' ')}
-                    showTitle={false}
-                  />
-                )}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-black bg-gradient-neon bg-clip-text text-transparent">
+                    {profile.display_name}
+                  </h1>
+                  {userStatus && (
+                    <StatusBadge 
+                      tier={userStatus.creator_tier as any}
+                      title={userStatus.creator_tier.replace('glass_', '').replace('_', ' ')}
+                      showTitle={false}
+                    />
+                  )}
+                </div>
+                <ShareButton
+                  title={`${profile.display_name} (@${profile.username})`}
+                  description={profile.bio}
+                  url={`/@${profile.username}`}
+                  type="profile"
+                  size="sm"
+                  variant="outline"
+                />
               </div>
               
               <p className="text-neon-cyan font-bold mb-3">@{profile.username}</p>
