@@ -7,10 +7,12 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/UserAvatar';
 import { StatusBadge } from '@/components/StatusBadge';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsOwnProfile } from '@/lib/dataPrivacy';
+import { useVerifiedAccounts } from '@/hooks/useVerifiedAccounts';
 
 interface Profile {
   id: string;
@@ -43,6 +45,7 @@ export default function PublicProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userStatus, setUserStatus] = useState<UserStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const { accounts: verifiedAccounts } = useVerifiedAccounts(profile?.id);
   
   // Check if viewing own profile for data privacy
   const isOwnProfile = useIsOwnProfile(profile?.id);
@@ -183,6 +186,23 @@ export default function PublicProfile() {
               </div>
               
               <p className="text-neon-cyan font-bold mb-3">@{profile.username}</p>
+              
+              {/* Verified Social Accounts */}
+              {verifiedAccounts.length > 0 && (
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-sm text-muted-foreground">Verified:</span>
+                  <div className="flex items-center gap-2">
+                    {verifiedAccounts.map((account) => (
+                      <VerifiedBadge
+                        key={account.id}
+                        platform={account.platform}
+                        username={account.platform_username}
+                        size="md"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
               
               {profile.bio && (
                 <p className="text-muted-foreground mb-4">{profile.bio}</p>

@@ -825,6 +825,48 @@ export type Database = {
         }
         Relationships: []
       }
+      verified_social_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          platform: string
+          platform_avatar_url: string | null
+          platform_email: string | null
+          platform_user_id: string
+          platform_username: string | null
+          updated_at: string
+          user_id: string
+          verified_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          platform: string
+          platform_avatar_url?: string | null
+          platform_email?: string | null
+          platform_user_id: string
+          platform_username?: string | null
+          updated_at?: string
+          user_id: string
+          verified_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          platform?: string
+          platform_avatar_url?: string | null
+          platform_email?: string | null
+          platform_user_id?: string
+          platform_username?: string | null
+          updated_at?: string
+          user_id?: string
+          verified_at?: string
+        }
+        Relationships: []
+      }
       wallet_balances: {
         Row: {
           available_balance: number
