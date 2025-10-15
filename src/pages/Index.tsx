@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, LogOut, Wallet, Search, DollarSign, Clock, User } from 'lucide-react';
+import { Plus, LogOut, Wallet, Search, DollarSign, Clock, User, Users } from 'lucide-react';
 import { ShareButton } from '@/components/ShareButton';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { ExternalSubmissionModal } from '@/components/ExternalSubmissionModal';
 import { SubmissionsManagementModal } from '@/components/SubmissionsManagementModal';
+import { ContributeToBountyModal } from '@/components/ContributeToBountyModal';
 import { UserAvatar } from '@/components/UserAvatar';
 import { NotificationBell } from '@/components/NotificationBell';
 import { ContentCollection } from '@/components/ContentCollection';
@@ -36,6 +37,8 @@ interface Request {
   is_anonymous: boolean;
   created_at: string;
   user_id: string;
+  minimum_contribution?: number;
+  allow_contributions?: boolean;
 }
 
 export default function Index() {
@@ -58,6 +61,7 @@ export default function Index() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showExternalSubmission, setShowExternalSubmission] = useState<{ id: string; title: string } | null>(null);
   const [showSubmissionsManagement, setShowSubmissionsManagement] = useState<{ id: string; title: string; userId: string } | null>(null);
+  const [showContributeModal, setShowContributeModal] = useState<{ id: string; title: string; bounty: number; minContribution?: number } | null>(null);
 
   const [newRequest, setNewRequest] = useState({
     title: '',
@@ -313,6 +317,18 @@ export default function Index() {
                             variant="outline"
                           />
                           <Button
+                            onClick={() => setShowContributeModal({ 
+                              id: request.id, 
+                              title: request.title,
+                              bounty: request.bounty,
+                              minContribution: request.minimum_contribution || 1
+                            })}
+                            size="sm"
+                            variant="secondary"
+                          >
+                            <Users className="w-4 h-4" />
+                          </Button>
+                          <Button
                             onClick={() => setShowExternalSubmission({ id: request.id, title: request.title })}
                             size="sm"
                           >
@@ -516,6 +532,17 @@ export default function Index() {
           requestTitle={showSubmissionsManagement.title}
           requestOwnerId={showSubmissionsManagement.userId}
           onClose={() => setShowSubmissionsManagement(null)}
+        />
+      )}
+
+      {showContributeModal && (
+        <ContributeToBountyModal
+          open={!!showContributeModal}
+          onOpenChange={(open) => !open && setShowContributeModal(null)}
+          bountyId={showContributeModal.id}
+          bountyTitle={showContributeModal.title}
+          currentBounty={showContributeModal.bounty}
+          minimumContribution={showContributeModal.minContribution}
         />
       )}
     </div>
