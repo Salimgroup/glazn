@@ -375,17 +375,28 @@ export default function Index() {
                             <span>{request.deadline}</span>
                           </div>
                         </div>
-                        <Button
-                          onClick={() => setShowSubmissionsManagement({ 
-                            id: request.id, 
-                            title: request.title,
-                            userId: request.user_id 
-                          })}
-                          size="sm"
-                          variant="outline"
-                        >
-                          Manage Submissions
-                        </Button>
+                        <div className="flex gap-2">
+                          <ShareButton
+                            title={request.title}
+                            description={request.description}
+                            price={request.bounty}
+                            url={`/`}
+                            type="bounty"
+                            size="sm"
+                            variant="outline"
+                          />
+                          <Button
+                            onClick={() => setShowSubmissionsManagement({ 
+                              id: request.id, 
+                              title: request.title,
+                              userId: request.user_id 
+                            })}
+                            size="sm"
+                            variant="outline"
+                          >
+                            Manage Submissions
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
