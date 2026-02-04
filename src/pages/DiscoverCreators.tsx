@@ -64,31 +64,33 @@ export default function DiscoverCreators() {
   const fetchCreators = async () => {
     setLoading(true);
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_type', 'creator')
-        .eq('onboarding_completed', true);
-
-      if (selectedNiches.length > 0) {
-        query = query.overlaps('niches', selectedNiches);
-      }
-
-      if (priceRange[0] > 0) {
-        query = query.gte('base_rate', priceRange[0]);
-      }
-      if (priceRange[1] < 10000) {
-        query = query.lte('base_rate', priceRange[1]);
-      }
-
-      if (minFollowers > 0) {
-        query = query.gte('follower_count', minFollowers);
-      }
-
-      const { data, error } = await query.order('rating', { ascending: false });
+        .eq('is_content_creator', true)
+        .order('reputation_score', { ascending: false });
 
       if (error) throw error;
-      setCreators(data || []);
+      
+      // Transform profiles to Creator format
+      const transformedCreators: Creator[] = (data || []).map(profile => ({
+        id: profile.id,
+        display_name: profile.display_name || 'Unknown',
+        username: profile.username || profile.id.slice(0, 8),
+        avatar_url: profile.avatar_url || '',
+        bio: profile.bio || '',
+        niches: profile.creator_platforms || [],
+        base_rate: null,
+        instagram_handle: null,
+        follower_count: null,
+        engagement_rate: null,
+        rating: profile.reputation_score ? profile.reputation_score / 20 : null, // Convert 0-100 to 0-5
+        total_reviews: profile.bounties_completed || 0,
+        is_verified: profile.verified || false,
+        location: null,
+      }));
+
+      setCreators(transformedCreators);
     } catch (error) {
       console.error('Error fetching creators:', error);
     } finally {

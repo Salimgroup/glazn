@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 type Platform = 'google' | 'linkedin' | 'twitter' | 'facebook' | 'github' | 'snapchat' | 'tiktok';
 
 interface VerifiedBadgeProps {
-  platform: Platform;
+  platform?: Platform;
   username?: string | null;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -36,6 +36,22 @@ const sizeClasses = {
 };
 
 export function VerifiedBadge({ platform, username, size = 'md' }: VerifiedBadgeProps) {
+  // If no platform specified, show a generic verified badge
+  if (!platform) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <BadgeCheck className={`text-neon-cyan ${sizeClasses[size]}`} />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Verified account</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
   const displayText = username 
     ? `Verified ${platformNames[platform]} account: ${username}`
     : `Verified ${platformNames[platform]} account`;

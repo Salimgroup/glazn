@@ -1,6 +1,9 @@
 import React from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface UserAvatarProps {
+  src?: string | null;
+  fallback?: string;
   ethnicity?: 'asian' | 'african' | 'caucasian' | 'hispanic' | 'mixed';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -29,15 +32,30 @@ const sizes = {
 };
 
 export const UserAvatar: React.FC<UserAvatarProps> = ({ 
+  src,
+  fallback,
   ethnicity = 'mixed', 
   size = 'md',
   className = '' 
 }) => {
+  // If src is provided, use Avatar component
+  if (src) {
+    return (
+      <Avatar className={className}>
+        <AvatarImage src={src} alt={fallback || 'User'} />
+        <AvatarFallback className="bg-gradient-to-br from-neon-pink to-neon-purple text-white">
+          {fallback || '?'}
+        </AvatarFallback>
+      </Avatar>
+    );
+  }
+
+  // Fallback to emoji-based avatar
   return (
     <div className={`relative ${className}`}>
       <div className={`absolute inset-0 bg-gradient-to-br ${ethnicityGradients[ethnicity]} rounded-full blur-md opacity-75 animate-pulse`} />
       <div className={`relative ${sizes[size]} bg-gradient-to-br ${ethnicityGradients[ethnicity]} rounded-full flex items-center justify-center border-2 border-white/20 shadow-lg`}>
-        <span className="animate-pulse">{ethnicityEmojis[ethnicity]}</span>
+        <span className="animate-pulse">{fallback || ethnicityEmojis[ethnicity]}</span>
       </div>
     </div>
   );
