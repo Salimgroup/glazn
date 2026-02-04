@@ -77,47 +77,36 @@ export default function DiscoverCampaigns() {
   const fetchCampaigns = async () => {
     setLoading(true);
     try {
-      // For now, fetch from bounties table (existing structure)
-      // In production, this would be a campaigns table
-      let query = supabase
-        .from('bounties')
-        .select(`
-          *,
-          profiles:creator_id (
-            id,
-            company_name,
-            avatar_url,
-            is_verified
-          )
-        `)
+      // Fetch from requests table (existing structure)
+      const { data, error } = await supabase
+        .from('requests')
+        .select('*')
         .eq('status', 'open')
         .order('created_at', { ascending: false });
 
-      const { data, error } = await query;
-
       if (error) throw error;
       
-      // Transform bounties to campaign format
-      const transformedCampaigns = (data || []).map(bounty => ({
-        id: bounty.id,
-        title: bounty.title,
-        description: bounty.description,
-        budget: bounty.amount,
+      // Transform requests to campaign format
+      const transformedCampaigns = (data || []).map(request => ({
+        id: request.id,
+        title: request.title,
+        description: request.description,
+        budget: request.bounty,
         budget_type: 'fixed' as const,
-        campaign_type: bounty.type || 'UGC Content',
-        niches: bounty.niches || [],
-        deadline: bounty.deadline,
-        slots_available: bounty.max_submissions || 10,
-        slots_filled: bounty.submission_count || 0,
-        created_at: bounty.created_at,
+        campaign_type: request.category || 'UGC Content',
+        niches: [] as string[],
+        deadline: request.deadline,
+        slots_available: 10,
+        slots_filled: 0,
+        created_at: request.created_at || new Date().toISOString(),
         brand: {
-          id: bounty.profiles?.id || '',
-          company_name: bounty.profiles?.company_name || 'Anonymous Brand',
-          avatar_url: bounty.profiles?.avatar_url || '',
-          is_verified: bounty.profiles?.is_verified || false,
+          id: request.user_id || '',
+          company_name: 'Brand',
+          avatar_url: '',
+          is_verified: false,
         },
-        requirements: bounty.requirements || [],
-        deliverables: bounty.deliverables || [],
+        requirements: [] as string[],
+        deliverables: [] as string[],
       }));
 
       setCampaigns(transformedCampaigns);

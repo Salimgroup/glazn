@@ -62,12 +62,12 @@ export default function Analytics() {
   const fetchUserType = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('user_type')
+      .select('is_content_creator')
       .eq('id', user?.id)
       .single();
     
-    if (data?.user_type) {
-      setUserType(data.user_type);
+    if (data) {
+      setUserType(data.is_content_creator ? 'creator' : 'brand');
     }
   };
 
