@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.contribute-to-bounty]
 verify_jwt = true
+
+[functions.generate-bounty-template]
+verify_jwt = true
