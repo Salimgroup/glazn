@@ -13,10 +13,6 @@ export default function Settings() {
   const { 
     user,
     signInWithGoogle,
-    signInWithLinkedIn,
-    signInWithTwitter,
-    signInWithFacebook,
-    signInWithGitHub,
     loading 
   } = useAuth();
   const navigate = useNavigate();
@@ -121,10 +117,6 @@ export default function Settings() {
             </p>
             <SocialLoginButtons
               onGoogleClick={() => handleSocialLink('Google', signInWithGoogle)}
-              onLinkedInClick={() => handleSocialLink('LinkedIn', signInWithLinkedIn)}
-              onTwitterClick={() => handleSocialLink('Twitter', signInWithTwitter)}
-              onFacebookClick={() => handleSocialLink('Facebook', signInWithFacebook)}
-              onGitHubClick={() => handleSocialLink('GitHub', signInWithGitHub)}
             />
           </div>
         </Card>

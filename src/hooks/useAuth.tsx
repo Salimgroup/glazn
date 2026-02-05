@@ -1,16 +1,13 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 
 type AuthContextType = {
   user: User | null;
   session: Session | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
-  signInWithLinkedIn: () => Promise<void>;
-  signInWithTwitter: () => Promise<void>;
-  signInWithFacebook: () => Promise<void>;
-  signInWithGitHub: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUpWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
@@ -45,56 +42,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
-    const redirectUrl = `${window.location.origin}/`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectUrl,
-      },
-    });
-    if (error) throw error;
-  };
-
-  const signInWithLinkedIn = async () => {
-    const redirectUrl = `${window.location.origin}/`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'linkedin_oidc',
-      options: {
-        redirectTo: redirectUrl,
-      },
-    });
-    if (error) throw error;
-  };
-
-  const signInWithTwitter = async () => {
-    const redirectUrl = `${window.location.origin}/`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'twitter',
-      options: {
-        redirectTo: redirectUrl,
-      },
-    });
-    if (error) throw error;
-  };
-
-  const signInWithFacebook = async () => {
-    const redirectUrl = `${window.location.origin}/`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'facebook',
-      options: {
-        redirectTo: redirectUrl,
-      },
-    });
-    if (error) throw error;
-  };
-
-  const signInWithGitHub = async () => {
-    const redirectUrl = `${window.location.origin}/`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: redirectUrl,
-      },
+    const { error } = await lovable.auth.signInWithOAuth('google', {
+      redirect_uri: window.location.origin,
     });
     if (error) throw error;
   };
@@ -138,10 +87,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       session, 
       loading, 
       signInWithGoogle, 
-      signInWithLinkedIn,
-      signInWithTwitter,
-      signInWithFacebook,
-      signInWithGitHub,
       signInWithEmail, 
       signUpWithEmail, 
       resetPassword, 
