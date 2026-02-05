@@ -13,10 +13,6 @@ export default function Auth() {
   const { 
     user, 
     signInWithGoogle,
-    signInWithLinkedIn,
-    signInWithTwitter,
-    signInWithFacebook,
-    signInWithGitHub,
     signInWithEmail, 
     signUpWithEmail, 
     resetPassword, 
@@ -237,10 +233,6 @@ export default function Auth() {
 
               <SocialLoginButtons
                 onGoogleClick={() => handleSocialSignIn('Google', signInWithGoogle)}
-                onLinkedInClick={() => handleSocialSignIn('LinkedIn', signInWithLinkedIn)}
-                onTwitterClick={() => handleSocialSignIn('Twitter', signInWithTwitter)}
-                onFacebookClick={() => handleSocialSignIn('Facebook', signInWithFacebook)}
-                onGitHubClick={() => handleSocialSignIn('GitHub', signInWithGitHub)}
               />
             </TabsContent>
 
@@ -294,10 +286,6 @@ export default function Auth() {
 
               <SocialLoginButtons
                 onGoogleClick={() => handleSocialSignIn('Google', signInWithGoogle)}
-                onLinkedInClick={() => handleSocialSignIn('LinkedIn', signInWithLinkedIn)}
-                onTwitterClick={() => handleSocialSignIn('Twitter', signInWithTwitter)}
-                onFacebookClick={() => handleSocialSignIn('Facebook', signInWithFacebook)}
-                onGitHubClick={() => handleSocialSignIn('GitHub', signInWithGitHub)}
               />
             </TabsContent>
           </Tabs>
